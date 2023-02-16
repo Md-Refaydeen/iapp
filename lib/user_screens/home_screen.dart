@@ -71,8 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() async {
         fetchData(email, location.date);
         await service.startGeofencing(mode);
-        print('1111');
-        print('1');
+
 
       });
       var greets = location.greeting();
