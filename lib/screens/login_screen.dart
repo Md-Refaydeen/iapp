@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:iapp/user_screens/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:iapp/services/getLoc_Time.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import '../admin_screens/home_screen.dart';
 import '../constants/constants.dart';
 import '../dto/user.dart';
@@ -24,10 +27,14 @@ class _LoginScreenState extends State<LoginScreen> {
   static var _emailController = TextEditingController();
   static var _passwordController = TextEditingController();
   Location location = Location();
+  List<String> values = ['Office', 'Home', 'Nippon'];
+  int _initialLabelIndex = 0; // Set the initial label index to 1 for "Office"
+
+
   String adminId = 'II5',adminName="Admin";
   bool isLoading = false;
   bool isSwitched = true;
-  var textValue = 'Office';
+  var textValue='Office';
   String? name, empEmail, mode;
   @override
   void initState() {
@@ -102,20 +109,41 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   SizedBox(
                                     width:
-                                        MediaQuery.of(context).size.width / 3,
+                                        MediaQuery.of(context).size.width / 3.5,
                                   ),
-                                  Text('Home'),
-                                  Switch(
-                                    value: isSwitched,
-                                    onChanged: toggleSwitch,
-                                    activeColor: Colors.white,
-                                    activeTrackColor: Colors.blue,
-                                    inactiveTrackColor: Colors.redAccent,
+                                  ToggleSwitch(
+                                    minWidth: 70.0,
+                                    minHeight: 40.0,
+                                    initialLabelIndex: _initialLabelIndex,
+                                    cornerRadius: 20.0,
+                                    activeFgColor: Colors.white,
+                                    inactiveBgColor: bgColor,
+                                    inactiveFgColor: Colors.white,
+                                    totalSwitches: 3,
+                                    animate: true, // with just animate set to true, default curve = Curves.easeIn
+                                    curve: Curves.bounceInOut,
+                                    icons: [
+                                      Icons.work_history_rounded,
+                                      Icons.home_work_outlined,
+                                      Icons.outbond_rounded
+                                    ],
+                                    iconSize: 30.0,
+                                    borderColor: [ attendance,],
+                                    dividerColor: Colors.blueGrey,
+                                    activeBgColors: [ [Color(0xfffeda75), Color(0xfffa7e1e), Color(0xffd62976), Color(0xff962fbf), Color(0xff4f5bd5)],[Color(0xff3b5998), Color(0xff8b9dc3)], [Color(0xff00aeff), Color(0xff0077f2)],],
+                                    onToggle: (index) {
+                                      print('switched to: $index');
+
+                                      textValue = values[index!.toInt()];
+                                      print('Switched to: $textValue');
+
+                                    }
                                   ),
-                                  Text('Office')
+
                                 ],
                               ),
                             ),
+
                             buildEmailField(),
                             SizedBox(
                               height: kDefaultPadding,
@@ -299,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   signIn(String email, String password, String modes) async {
 
-
+  print(modes);
     var jsonResponse;
     String apiEndpoint ='http://ems-ma.ideassionlive.in/api/User/getVerifyUser?empEmailId=$email&password=$password&workMode=$modes';
     final Uri url = Uri.parse(apiEndpoint);
@@ -313,9 +341,7 @@ class _LoginScreenState extends State<LoginScreen> {
         name = jsonResponse["empName"];
         mode = jsonResponse["workMode"];
         empEmail = jsonResponse["empEmailId"];
-       print(empEmail);
     });
-      print(user.empEmailId);
 
 
       if(name==adminName && empEmail==user.empEmailId){

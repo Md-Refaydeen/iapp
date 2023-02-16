@@ -55,6 +55,8 @@ dependencies:
   path_provider: ^2.0.12
   open_file: ^3.2.1
   responsive_framework: ^0.2.0
+  toggle_switch: ^2.0.1
+
 
 
 
@@ -92,7 +94,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
       - assets/images/
-  #   - images/a_dot_burr.jpeg
+      - assets/icons/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

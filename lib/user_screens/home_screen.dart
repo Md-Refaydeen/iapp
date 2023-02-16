@@ -53,9 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    //service.markAttendance(position);
-    service.startGeofencing();
     location.getDate();
     check();
     // // _timer = Timer.periodic(Duration(seconds: 60), (timer) {
@@ -66,12 +63,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> check() async {
+    print('check');
 
     final prefs = await SharedPreferences.getInstance();
     _isCheckedIn = prefs.getBool('_isCheckedIn') ?? false;
     Future.delayed(const Duration(milliseconds: 50), () {
-      setState(() {
+      setState(() async {
         fetchData(email, location.date);
+        await service.startGeofencing(mode);
+
       });
       var greets = location.greeting();
       print(greets);
@@ -518,7 +518,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ));
       }
-    } else {
+    } else if(mode=='Nippon' && checkMode == true){
+      if (service.officeAddress != null) {
+        final prefs = await SharedPreferences.getInstance();
+
+        setState(() {
+          Address = service.officeAddress;
+          _isCheckedIn = true;
+          prefs.setBool('_isCheckedIn', _isCheckedIn);
+        });
+
+        showDialog(
+            context: context,
+            builder: (_) => DialogComponent(
+              status: 'Access Granted',
+              image: 'assets/images/Success.png',
+              buttonTitle: 'Go in',
+              content: 'Welcome Back,You are in Nippon Office',
+              onPress: () {
+                Navigator.of(context).pop();
+              },
+            ));
+
+        updateLoginLocation(email);
+      } else {
+        showDialog(
+            context: context,
+            builder: (_) => DialogComponent(
+              status: 'Access Denied',
+              image: 'assets/images/denied.png',
+              buttonTitle: 'Go Back',
+              content: 'Sorry ,You are not in Nippon Office',
+              onPress: () {
+                Navigator.of(context).pop();
+              },
+            ));
+      }
+
+    }
+    else {
       //if the user in home this will work
       await location.getAddress();
       final prefs = await SharedPreferences.getInstance();
