@@ -149,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     arguments: {
                       'email': email,
                       'name': name,
+                      'mode':mode,
                     });
               },
             ),

@@ -43,9 +43,9 @@ class GeoFencingService {
       EasyGeofencing.stopGeofenceService();
 
       await EasyGeofencing.startGeofenceService(
-          pointedLatitude: '13.0565323',
-          pointedLongitude: '80.2570045',
-          radiusMeter: '10.0',
+          pointedLatitude: '13.056290',
+          pointedLongitude: '80.255287',
+          radiusMeter: '15.0',
           eventPeriodInSeconds: 5);
       if (geofenceStatusStream == null) {
         print('Status stream:${geofenceStatusStream}');

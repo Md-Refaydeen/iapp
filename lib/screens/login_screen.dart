@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         MediaQuery.of(context).size.width / 3.5,
                                   ),
                                   ToggleSwitch(
-                                    minWidth: 70.0,
+                                    minWidth: 72.0,
                                     minHeight: 40.0,
                                     initialLabelIndex: _initialLabelIndex,
                                     cornerRadius: 20.0,
@@ -125,8 +125,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                     icons: [
                                       Icons.work_history_rounded,
                                       Icons.home_work_outlined,
-                                      Icons.outbond_rounded
+                                      null
                                     ],
+
+                                    labels: ['','','Nippon'],
+                                    customTextStyles: [
+                                      null,
+                                      null,
+                                      TextStyle(color: Colors.white,fontSize: 14)
+                                    ],
+
                                     iconSize: 30.0,
                                     borderColor: [ attendance,],
                                     dividerColor: Colors.blueGrey,

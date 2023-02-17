@@ -72,6 +72,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
     if (arguments != null) {
       email = arguments['email'];
       name = arguments['name'];
+      mode = arguments['mode'];
+
     }
     return Scaffold(
       key: _scaffoldKey,
@@ -415,7 +417,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                               ? '$checkInTime'
                                               : '------'),
                                           Text(checkOutTime != null
-                                              ? '$checkInTime'
+                                              ? '$checkOutTime'
                                               : '------'),
                                         ],
                                       ),
