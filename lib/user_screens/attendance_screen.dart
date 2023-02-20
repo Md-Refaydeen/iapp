@@ -13,7 +13,7 @@ import '../screens/login_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   static String routeName = 'AttendanceScreen';
-  var date,status;
+  var date, status;
 
   @override
   State<StatefulWidget> createState() {
@@ -25,7 +25,6 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   Future<List<User>>? _user;
   Map<DateTime, List<dynamic>> _events = {};
-  Map<DateTime, String> _attendance={};
 
   Location location = Location();
   DateTime? _selectedDate, _dates;
@@ -33,7 +32,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   var day;
   bool _isVisible = false;
   String? checkInTime, checkOutTime;
-  String? empName, workhrs, remarks, mode, rdate;
+  String? empName, workhrs, remarks, mode, wmode, rdate;
   int? present, absent, month, year;
   final dateFormat = DateFormat('yyyy-MM-dd');
   final dayFormat = DateFormat('d E');
@@ -53,9 +52,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
         month = int.parse(location.month);
         print('$year,$month');
       });
-      _user=fetchDetails(email, month, year);
+      _user = fetchDetails(email, month, year);
       checkStatus(email, month, year);
-
     });
   }
 
@@ -72,8 +70,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
     if (arguments != null) {
       email = arguments['email'];
       name = arguments['name'];
-      mode = arguments['mode'];
-
+      wmode = arguments['mode'];
     }
     return Scaffold(
       key: _scaffoldKey,
@@ -118,11 +115,12 @@ class _CalendarScreenState extends State<AttendanceScreen> {
               title: 'Home',
               iconData: Icons.home_filled,
               onPress: () {
-                Navigator.pushNamed(context, HomeScreen.routeName,
-                    arguments: {'email': email, 'empName': name, 'mode': mode
-
+                Navigator.pushNamed(context, HomeScreen.routeName, arguments: {
+                  'email': email,
+                  'empName': name,
+                  'mode': wmode
                 });
-                print(mode);
+                print(wmode);
               },
             ),
             ListComponents(
@@ -133,7 +131,6 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                     arguments: {'email': email, 'name': name});
               },
             ),
-
             ListComponents(
               title: 'Logout',
               iconData: Icons.power_settings_new,
@@ -143,8 +140,9 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                     content: Text("Logged out Successfully".toString())));
               },
             ),
-            SizedBox(height: MediaQuery.of(context).size.height/9.5,),
-
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 9.5,
+            ),
             Container(
               margin:
                   EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
@@ -200,15 +198,14 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         ),
                         side: BorderSide(color: Colors.white, width: 2.0),
                       ),
-
                       child: TableCalendar(
-
                         eventLoader: _getEvents,
                         onPageChanged: (d) {
                           year = d.year;
                           month = d.month;
                           _debounce?.cancel();
-                          _debounce = Timer(const Duration(milliseconds: 500), () {
+                          _debounce =
+                              Timer(const Duration(milliseconds: 500), () {
                             // Call the API here
                             Future.delayed(Duration(milliseconds: 500), () {
                               checkStatus(email, month, year).then((value) {
@@ -217,60 +214,27 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                               });
                             });
                           });
-
                         },
                         selectedDayPredicate: (day) =>
                             isSameDay(day, _selectedDate),
-                        firstDay: DateTime.utc(2010, 10, 16),
+                        firstDay: DateTime.utc(2018, 10, 16),
                         lastDay: DateTime.utc(2050, 3, 14),
                         calendarFormat: CalendarFormat.month,
-
                         calendarBuilders: CalendarBuilders(
                           markerBuilder: (context, date, events) {
-                            var status = _events.containsKey(date) ? _events[date] : null;
-
-                            if (status == 'Present') {
-                              return Container(
-                                height: 5,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            } else if (status == 'Absent') {
-                              return Container(
-                                height: 5,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            } else {
-                              return Container(
-                                height: 3,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey,
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            }
+                            var status = _events.containsValue("Present")
+                                ? "Present"
+                                : "Absent";
+                            return Container(
+                              height: 5,
+                              decoration: BoxDecoration(
+                                  color: status == "Present"
+                                      ? Colors.green
+                                      : Colors.red,
+                                  shape: BoxShape.circle),
+                            );
                           },
-
-                          // markerBuilder: (context, date, events) {
-                          //
-                          //   var status = _events.containsKey(date) ? _events[date] : 'Absent';
-                          //   print('status:${_events[date]}');
-                          //   return Container(
-                          //     height: 5,
-                          //     decoration: BoxDecoration(
-                          //         color: status == "Present" ? Colors.green : Colors.red,
-                          //         shape: BoxShape.circle
-                          //     ),
-                          //   );
-                          //   },
-
                           selectedBuilder: (context, date, events) => Container(
-
                               margin: const EdgeInsets.all(5.0),
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
@@ -401,8 +365,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
                                     //alignment: WrapAlignment.spaceEvenly,
                                     children: [
-                                      Text(
-                                          mode != null ? '$mode' : '------'),
+                                      Text(mode != null ? '$mode' : '------'),
                                       SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width /
@@ -647,7 +610,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
   Future<List<User>> fetchDetails(var email, int? month, int? year) async {
     try {
-      var api = 'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
+      var api =
+          'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
       print(api);
       var response = await http.get(Uri.parse(api));
       print(response);
@@ -657,13 +621,24 @@ class _CalendarScreenState extends State<AttendanceScreen> {
         var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
         for (var item in getUsersData) {
           setState(() {
+            //widget.date = DateTime.parse(item['date'].split(' ')[0]);
+
             widget.date = DateTime.parse(item['date']);
             widget.status = item['status'];
-
           });
 
+          // Add the event to the events map
+          if (_events[widget.date] == null) {
+            _events[widget.date] = [widget.status];
+            //  print(_events[widget.date]);
+          } else {
+            _events[widget.date]?.add(widget.status);
+          }
+          print(_events[widget.date]);
+          print('date:${widget.date}');
+          print(_events[widget.status]);
         }
-
+        print(_events);
         return listUsers;
       } else {
         throw Exception('Failed to load users');
@@ -673,13 +648,16 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       rethrow;
     }
   }
+
   List<dynamic> _getEvents(DateTime date) {
-    var events = _events.containsKey(date) ? _events[date] : [];
-    print('::$_events');
-    return events as List<dynamic>;
+    String formattedDate = DateFormat("yyyy-MM-dd").format(date);
+    // Retrieve the list of events for the formatted date
+    var statuses = _events[date] ?? [];
+    print('statuses:$statuses');
+    // _events.forEach((date, statuses) {
+    //   print('$date: $statuses');
+    // });
+
+    return statuses;
   }
-
-
-
-
 }

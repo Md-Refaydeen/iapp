@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import '../constants/constants.dart';
 import '../dto/user.dart';
 import '../screens/login_screen.dart';
+import '../services/exportExcel.dart';
 import '../services/getLoc_Time.dart';
 import '../widgets/admindrawer_components.dart';
 import 'individual_attendance.dart';
@@ -294,11 +295,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
 
                                             return DataRow(
                                               cells: [
-                                                DataCell(Text("${index + 1}")),
+                                                DataCell(Text("${index + 1}",style: TextStyle(color: Color(0xFF003756)))),
                                                 DataCell(
                                                     Text(_user.name == null
                                                         ? '----'
-                                                        : '${_user.name}'),
+                                                        : '${_user.name}',style: TextStyle(color: Color(0xFF003756)),),
                                                     onTap: () {
                                                   setState(() {
                                                     name = _user.name;
@@ -378,7 +379,8 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               onPressed: () async {
                                 var attendanceDetailsList =
                                     await attendanceDetails();
-                                printAttendanceDetails(attendanceDetailsList);
+                                ExportExcel().exportOverAllData(context, attendanceDetailsList);
+
                                 //   attendanceDetails();
                               },
                               child: Container(
@@ -393,9 +395,15 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                     bottomRight: Radius.circular(25),
                                     bottomLeft: Radius.circular(25),
                                   ),
+
                                   color: Colors.white,
                                 ),
-                                child: Center(child: Text('Export')),
+                                child: Center(child: Text('Export',style: TextStyle(
+                                    color: Color(
+                                      0xFF5278FF,
+                                    ),
+                                    decoration: TextDecoration.underline),
+                                )),
                               ),
                             )
                           ],
@@ -522,81 +530,5 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
     }
   }
 
-  Future<void> printAttendanceDetails(List attendanceDetails) async {
-    var excel =
-        Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
-    Sheet sheetObject = excel['OverAll Report'];
-    sheetObject.setColWidth(0, 22.0);
-    sheetObject.setColWidth(1, 22.0);
-    sheetObject.setColWidth(2, 20.0);
-    sheetObject.setColWidth(3, 40.0);
-    sheetObject.setColWidth(4, 20.0);
-    sheetObject.setColWidth(5, 40.0);
 
-    sheetObject.appendRow([
-      "Employee Name",
-      "Attendance Date",
-      "Time in",
-      'Login Location',
-      "Time Out",
-      "Logout Location",
-      "Total Time",
-      "Status"
-    ]);
-
-    for (var attendance in attendanceDetails) {
-      for (String key in attendance.keys) {
-        sheetObject.appendRow(['$key']);
-
-        if (attendance[key] is List) {
-          for (var value in attendance[key]) {
-            sheetObject.appendRow([
-              value[''],
-              value['date'],
-              value['loginTime'],
-              value['loginLocation'],
-              value['logoutTime'],
-              value['logoutLocation'],
-              value['totalWorkingHours'],
-              value['status']
-            ]);
-          }
-        } else {
-          sheetObject.appendRow(['${attendance[key]}']);
-        }
-      }
-    }
-
-    String outputFile;
-    final Directory? dir = await getExternalStorageDirectory();
-    outputFile = '${dir?.path}/EmployeeReport.xlsx';
-    print(outputFile);
-
-    try {
-      List<int>? fileBytes = excel.save();
-      if (fileBytes != null) {
-        File(path.join(outputFile))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
-      }
-    } on FileSystemException catch (e) {
-      print('Error while writing to the file: $e');
-    } catch (e) {
-      print('Unknown error: $e');
-    }
-
-    // Show a notification to the user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Your Excel file has been saved.'),
-        action: SnackBarAction(
-          label: 'View',
-          onPressed: () {
-            print(outputFile);
-            final message = OpenFile.open(outputFile);
-          },
-        ),
-      ),
-    );
-  }
 }

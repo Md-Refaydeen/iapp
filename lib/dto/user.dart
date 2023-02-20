@@ -9,7 +9,7 @@ class User {
   String? loginLocation;
   String? logoutTime;
   String? logoutLocation;
-  String? workmode;
+  String? workmode,workModeCheckOut;
   String? empId,empUniqueId;
   String? empEmailId;
   String? empName,name;
@@ -31,7 +31,7 @@ class User {
       this.empId,
       this.name,
       this.empEmailId,
-      this.Absent,this.Present});
+      this.Absent,this.Present,this.workModeCheckOut});
 
   // User({int? status,
   // String? message,
@@ -51,6 +51,8 @@ class User {
       status: json["status"],
       totalWorkingHours: json["totalWorkingHours"],
       workmode: json["workmode"],
+      workModeCheckOut: json["workModeCheckOut"],
+
       empId: json["empId"],
       empEmailId: json["empEmailId"],
       empName: json["empName"],
@@ -64,6 +66,8 @@ class User {
     data['id'] = id;
     data['Present'] = Present;
     data['Absent'] = Absent;
+    data['workModeCheckOut'] = workModeCheckOut;
+
     data['date'] = date;
     data['email'] = email;
     data['loginTime'] = loginTime;

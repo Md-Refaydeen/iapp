@@ -370,6 +370,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid Credentials',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w400),),backgroundColor: attendance,));
       setState(() {
         isLoading = false;
       });

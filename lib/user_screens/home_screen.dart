@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -59,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
     //   if (DateTime.now().hour >= 11.22) {
     //     checkOut();
     //   }
-
   }
 
   Future<void> check() async {
@@ -71,13 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() async {
         fetchData(email, location.date);
         await service.startGeofencing(mode);
-
-
       });
       var greets = location.greeting();
       print(greets);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(greets,style: TextStyle(fontSize: 14,fontWeight: FontWeight.w600),),backgroundColor: Color(0xFFAD8DCD),duration: Duration(seconds: 5),));
-
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          greets,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Color(0xFFAD8DCD),
+        duration: Duration(seconds: 5),
+      ));
     });
   }
 
@@ -114,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 15,
-                  width: MediaQuery.of(context).size.width /5,
+                  width: MediaQuery.of(context).size.width / 5,
                   child: CircleAvatar(
                     backgroundImage: AssetImage(
                       'assets/images/user.png',
@@ -134,7 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListComponents(
               title: 'Home',
-
               iconData: Icons.home_filled,
               onPress: () {
                 Navigator.pushNamed(context, HomeScreen.routeName,
@@ -149,11 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     arguments: {
                       'email': email,
                       'name': name,
-                      'mode':mode,
+                      'mode': mode,
                     });
               },
             ),
-
             ListComponents(
               title: 'Logout',
               iconData: Icons.power_settings_new,
@@ -163,8 +165,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     content: Text("Logged out Successfully".toString())));
               },
             ),
-            SizedBox(height: MediaQuery.of(context).size.height/4.0,),
-
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 4.0,
+            ),
             Container(
               margin:
                   EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
@@ -327,24 +330,26 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Text(
                                   name,
-                                  style: TextStyle(fontSize: 17,fontWeight: FontWeight.w600,color: Color(0xFF003756)),
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF003756)),
                                 ),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    Text(
-                                      'Trainee',
-                                      style: TextStyle(fontSize: 15,fontWeight: FontWeight.w400,color: Color(0xff003756))
-                                    ),
+                                    Text('Trainee',
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff003756))),
                                     SizedBox(
                                       width: 15,
                                     ),
                                     TextButton(
                                         onPressed: () {},
-                                        style: ButtonStyle(
-
-                                        ),
+                                        style: ButtonStyle(),
                                         child: Text(mode.toString())),
                                   ],
                                 )
@@ -371,8 +376,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Text(
                             location.cdate3.toString(),
-                            style: TextStyle(fontSize: 17,fontWeight: FontWeight.w600,color: Color(0xFF003756),
-                          ),
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF003756),
+                            ),
                           ),
                         ],
                       ),
@@ -384,8 +392,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 20,
                           ),
                           Text(location.day.toString(),
-                            style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600,color: Color(0xFF003756),))
-                             ],
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF003756),
+                              ))
+                        ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -393,9 +405,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           DigitalClockComponent(),
                           SizedBox(
-                            width:MediaQuery.of(context).size.width/12,
+                            width: MediaQuery.of(context).size.width / 12,
                           ),
-
                           Container(
                             width: 150,
                             height: 38,
@@ -433,8 +444,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Text(
                             'Check In:',
-                            style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400,color: Color(0XFF003756)),
-
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0XFF003756)),
                           ),
                           Column(
                             children: [
@@ -442,7 +455,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 checkInTime != null
                                     ? '$checkInTime'
                                     : '--- ---',
-                                style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400,color: Color(0XFF003756)),
+                                style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0XFF003756)),
                               )
                             ],
                           ),
@@ -458,8 +474,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Text(
                             'Check Out:',
-                            style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400,color: Color(0XFF003756)),
-
+                            style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0XFF003756)),
                           ),
                           Column(
                             children: [
@@ -467,8 +485,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 checkOutTime != null
                                     ? '$checkOutTime'
                                     : '--- ---',
-                                style: TextStyle(fontSize: 17,fontWeight: FontWeight.w400,color: Color(0XFF003756)),
-
+                                style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0XFF003756)),
                               )
                             ],
                           ),
@@ -486,102 +506,93 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> checkIn() async {
     if (mode == 'Office' && checkMode == true) {
       if (service.officeAddress != null) {
-        final prefs = await SharedPreferences.getInstance();
-
         setState(() {
           Address = service.officeAddress;
           _isCheckedIn = true;
-          prefs.setBool('_isCheckedIn', _isCheckedIn);
         });
 
-        showDialog(
-            context: context,
-            builder: (_) => DialogComponent(
-                  status: 'Access Granted',
-                  image: 'assets/images/Success.png',
-                  buttonTitle: 'Go in',
-                  content: 'Welcome Back,You are in Office',
-                  onPress: () {
-                    Navigator.of(context).pop();
-                  },
-                ));
-
-        updateLoginLocation(email);
+        await showAccessDialogBox('Office');
+        await compute(updateLoginLocation, email);
       } else {
-        showDialog(
-            context: context,
-            builder: (_) => DialogComponent(
-                  status: 'Access Denied',
-                  image: 'assets/images/denied.png',
-                  buttonTitle: 'Go Back',
-                  content: 'Sorry ,You are not in Office',
-                  onPress: () {
-                    Navigator.of(context).pop();
-                  },
-                ));
+        await showDeniedDialogBox('Office');
       }
-    } else if(mode=='Nippon' && checkMode == true){
+    } else if (mode == 'Nippon' && checkMode == true) {
       if (service.officeAddress != null) {
-        final prefs = await SharedPreferences.getInstance();
+        //final prefs = await SharedPreferences.getInstance();
 
         setState(() {
           Address = service.officeAddress;
           _isCheckedIn = true;
-          prefs.setBool('_isCheckedIn', _isCheckedIn);
+          // prefs.setBool('_isCheckedIn', _isCheckedIn);
         });
+        await showAccessDialogBox('Nippon Office');
+        await compute(updateLoginLocation, email);
 
-        showDialog(
-            context: context,
-            builder: (_) => DialogComponent(
+        //updateLoginLocation(email);
+      } else {
+        showDeniedDialogBox('Nippon Office');
+      }
+    } else {
+      //if the user in home this will work
+      await location.getAddress();
+      // final prefs = await SharedPreferences.getInstance();
+       setState(() {
+        _isCheckedIn = true;
+        //  prefs.setBool('_isCheckedIn', _isCheckedIn);
+        Address = location.homeAddress;
+      });
+      showAccessDialogBox('WFH');
+      print('wfh:$Address');
+      // updateLoginLocation(email);
+      await compute(updateLoginLocation, email);
+    }
+  }
+
+  Future<void> showAccessDialogBox(String msg) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('_isCheckedIn', _isCheckedIn);
+
+    showDialog(
+        context: context,
+        builder: (_) => DialogComponent(
               status: 'Access Granted',
               image: 'assets/images/Success.png',
               buttonTitle: 'Go in',
-              content: 'Welcome Back,You are in Nippon Office',
+              content: 'Welcome Back,You are in $msg',
               onPress: () {
                 Navigator.of(context).pop();
               },
             ));
+  }
 
-        updateLoginLocation(email);
-      } else {
-        showDialog(
-            context: context,
-            builder: (_) => DialogComponent(
+  Future<void> showDeniedDialogBox(String msg) async {
+    showDialog(
+        context: context,
+        builder: (_) => DialogComponent(
               status: 'Access Denied',
               image: 'assets/images/denied.png',
               buttonTitle: 'Go Back',
-              content: 'Sorry ,You are not in Nippon Office',
+              content: 'Sorry ,You are not in $msg',
               onPress: () {
                 Navigator.of(context).pop();
               },
             ));
-      }
+  }
 
-    }
-    else {
-      //if the user in home this will work
-      await location.getAddress();
-      final prefs = await SharedPreferences.getInstance();
-
-      setState(() {
-        _isCheckedIn = true;
-        prefs.setBool('_isCheckedIn', _isCheckedIn);
-        Address = location.homeAddress;
-      });
-      showDialog(
-          context: context,
-          builder: (_) => DialogComponent(
-                status: 'Access Granted',
-                image: 'assets/images/remote.png',
-                buttonTitle: 'Go in',
-                content: 'Welcome,You are in  WFH',
-                onPress: () {
-                  Navigator.of(context).pop();
-                },
-              ));
-      print('wfh:$Address');
-      updateLoginLocation(email);
-    }
+  Future<void> exitSucesssDialogBox() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('_isCheckedIn');
+    showDialog(
+        context: context,
+        builder: (_) => DialogComponent(
+              status: 'Exit',
+              image: 'assets/images/Success.png',
+              buttonTitle: 'Ok',
+              content: 'We look forward to see you',
+              onPress: () {
+                Navigator.of(context).pop();
+              },
+            ));
   }
 
   Future<void> checkOut() async {
@@ -590,21 +601,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Address = service.officeAddress;
         _isCheckedIn = false;
       });
-
+      await exitSucesssDialogBox();
       updateLogoutLocation(email, Address);
-      showDialog(
-          context: context,
-          builder: (_) => DialogComponent(
-                status: 'Exit',
-                image: 'assets/images/Success.png',
-                buttonTitle: 'Ok',
-                content: 'We look forward to see you',
-                onPress: () {
-                  Navigator.of(context).pop();
-                },
-              ));
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('_isCheckedIn');
     } else {
       //for user Wfh
       await location.getAddress();
@@ -612,20 +610,8 @@ class _HomeScreenState extends State<HomeScreen> {
         _isCheckedIn = false;
         Address = location.homeAddress;
       });
+      await exitSucesssDialogBox();
       updateLogoutLocation(email, Address);
-      showDialog(
-          context: context,
-          builder: (_) => DialogComponent(
-                status: 'Exit',
-                image: 'assets/images/Success.png',
-                buttonTitle: 'ok',
-                content: 'We look Forward to see you',
-                onPress: () {
-                  Navigator.of(context).pop();
-                },
-              ));
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('_isCheckedIn');
     }
   }
 
@@ -661,7 +647,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
   void fetchData(var email, var date) async {
     try {
       String apiEndpoint =
@@ -689,7 +674,6 @@ class _HomeScreenState extends State<HomeScreen> {
       rethrow;
     }
   }
-
   Future<void> updateLogoutLocation(var email, String? Address) async {
     var headers = {
       'accept': '*/*',
@@ -699,7 +683,8 @@ class _HomeScreenState extends State<HomeScreen> {
     var data = {
       "email": email,
       "logoutLocation": Address.toString(),
-      "date": location.date.toString()
+      "date": location.date.toString(),
+      "workModeCheckOut":mode.toString(),
     };
     var response = await http.put(
         Uri.parse('http://ems-ma.ideassionlive.in/api/UserActivity/logout'),

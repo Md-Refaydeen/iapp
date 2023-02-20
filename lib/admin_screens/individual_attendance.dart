@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:iapp/services/exportExcel.dart';
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
@@ -118,7 +119,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                           IconButton(
                               onPressed: () {
                                 Navigator.pushNamed(
-                                    context, AdminHomeScreen.routeName);
+                                    context, AdminAttendanceScreen.routeName);
                               },
                               icon: Icon(
                                 Icons.arrow_circle_left_outlined,
@@ -329,7 +330,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                 ),
                                 MaterialButton(
                                   onPressed: () async {
-                                    exportData(_user!);
+                                    ExportExcel().exportData(context,_user!);
                                   },
                                   child: Container(
                                     height:
@@ -476,89 +477,4 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
     }
   }
 
-  Future<void> exportData(Future<List<User>> data) async {
-    List<User> users = await data;
-
-    var excel =
-        Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
-    Sheet sheetObject = excel['Individual Report'];
-    CellStyle headerStyle = CellStyle(
-        backgroundColorHex: "#0000FF",
-        fontSize: 30,
-        bold: true,
-        fontFamily: getFontFamily(FontFamily.Abadi_MT_Condensed_Extra_Bold));
-    var cell = sheetObject.cell(CellIndex.indexByString("A2"));
-    cell.cellStyle = headerStyle;
-
-    sheetObject.appendRow(
-      ["Attendance Report"],
-    );
-
-    CellStyle cellStyle = CellStyle(
-        backgroundColorHex: "#1AFF1A",
-        fontFamily: getFontFamily(FontFamily.Calibri));
-    cell.cellStyle = cellStyle;
-    sheetObject.setColWidth(0, 22.0);
-    sheetObject.setColWidth(1, 22.0);
-    sheetObject.setColWidth(2, 20.0);
-    sheetObject.setColWidth(3, 40.0);
-    sheetObject.setColWidth(4, 20.0);
-    sheetObject.setColWidth(5, 40.0);
-
-    sheetObject.appendRow([
-      "Employee Name",
-      "Attendance Date",
-      "Time in",
-      'Login Location',
-      "Time Out",
-      "Logout Location",
-      "Total Time",
-      "Status"
-    ]);
-
-    for (var i = 0; i < users.length; i++) {
-      User user = users[i];
-      print(user.name);
-      sheetObject.appendRow([
-        user.name,
-        user.date,
-        user.loginTime,
-        user.loginLocation,
-        user.logoutTime,
-        user.logoutLocation,
-        user.totalWorkingHours,
-        user.status
-      ]);
-    }
-    String outputFile;
-    final Directory? dir = await getExternalStorageDirectory();
-    outputFile = '${dir?.path}/file.xlsx';
-    print(outputFile);
-
-    try {
-      List<int>? fileBytes = excel.save();
-      if (fileBytes != null) {
-        File(path.join(outputFile))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(fileBytes);
-      }
-    } on FileSystemException catch (e) {
-      print('Error while writing to the file: $e');
-    } catch (e) {
-      print('Unknown error: $e');
-    }
-    // / Show a notification to the user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Your Excel file has been saved.'),
-        action: SnackBarAction(
-          label: 'View',
-          onPressed: () {
-            print(outputFile);
-            final message = OpenFile.open(outputFile);
-          },
-        ),
-      ),
-    );
-  }
 }
