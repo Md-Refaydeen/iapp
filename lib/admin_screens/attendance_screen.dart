@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:excel/excel.dart';
-import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:iapp/admin_screens/home_screen.dart';
@@ -36,6 +33,10 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   List<User> _filteredUser = [];
   int currentMonth = DateTime.now().month;
   int currentYear = DateTime.now().year;
+  List<User> _filteredUserList = [];
+  int _rowsPerPage =PaginatedDataTable.defaultRowsPerPage;
+  int _currentPage = 0;
+
   final dataTableKey = GlobalKey<_AdminAttendanceScreenState>();
 
   List months = [
@@ -78,22 +79,26 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
         _filteredUser = _user as List<User>;
       } else {
         _filteredUser = _filteredUser
-            .where((data) => data.name!.contains(_searchString!))
+            .where((data) => data.name!.toLowerCase().contains(_searchString!.toLowerCase()))
             .toList();
+
       }
     });
   }
+
 
   void _clearSearch() {
     _searchController.clear();
     setState(() {
       fetchCount(month, year).then((value) {
         setState(() {
+          print(value);
           _filteredUser = value;
         });
       });
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -223,192 +228,121 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                         padding: new EdgeInsets.fromLTRB(8, 8, 8, 8),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height / 17,
+                        height: MediaQuery.of(context).size.height /22,
                       ),
                       Expanded(
                           child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            FutureBuilder(
-                              future: _user,
-                              builder: (context, snapshot) {
-                                print(snapshot.data);
-                                print(snapshot.hasData);
-                                if (snapshot.hasData) {
-                                  return Container(
-                                    width: MediaQuery.of(context).size.width /
-                                        1.15,
-                                    decoration: BoxDecoration(
-                                        //borderRadius: BorderRadius.circular(15.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 15.0,
-                                            offset: Offset(0, 2),
-                                          )
-                                        ]),
-                                    child: DataTable(
-                                      key: dataTableKey,
-                                      columnSpacing: 35,
-                                      headingRowColor:
-                                          MaterialStateColor.resolveWith(
-                                              (states) => BGcolor),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(25),
-                                          topRight: Radius.circular(25),
-                                          bottomRight: Radius.circular(6),
-                                          bottomLeft: Radius.circular(6),
-                                        ), // this only make bottom rounded and not top
-                                        color: Colors.white,
-                                      ),
-                                      columns: [
-                                        DataColumn(
-                                          label: Text(
-                                            'S.No',
-                                            style: TextStyle(
-                                                color: Color(0xff003756)),
+                            child: Column(
+                              children: [
+                                FutureBuilder(
+                                  future: _user,
+                                  builder: (context, snapshot) {
+                                    print(snapshot.data);
+                                    print(snapshot.hasData);
+                                    if (snapshot.hasData) {
+                                      return Container(
+                                        height: MediaQuery.of(context).size.height/1.4,
+                                        width: MediaQuery.of(context).size.width /
+                                            1.15,
+                                        decoration: BoxDecoration(
+                                            //borderRadius: BorderRadius.circular(15.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black12,
+                                                blurRadius: 15.0,
+                                                offset: Offset(0, 2),
+                                              )
+                                            ]),
+                                        child: PaginatedDataTable(
+                                           arrowHeadColor: Colors.black,
+
+                                          columnSpacing: 15,
+                                          rowsPerPage: _rowsPerPage,
+                                          onRowsPerPageChanged: (newRowsPerPage) {
+                                            setState(() {
+                                              _rowsPerPage = newRowsPerPage!;
+                                            });
+                                          },
+                                          initialFirstRowIndex: 0,
+                                          onPageChanged: (newPage) {
+                                            setState(() {
+                                              _currentPage = newPage;
+                                            });
+                                          },
+                                          columns: [
+
+                                            DataColumn(
+
+                                              label: Text('S.No'),
+
+                                            ),
+                                            DataColumn(
+                                              label: Text('Name'),
+                                            ),
+                                            DataColumn(
+                                              label: Text('Present'),
+                                            ),
+                                            DataColumn(
+                                              label: Text('Absent'),
+                                            ),
+                                          ],
+                                          source: _UserDataSource(
+                                            _filteredUser,
+                                            _rowsPerPage,
+                                            _currentPage,
+                                            name,
+                                            context
                                           ),
+
                                         ),
-                                        DataColumn(
-                                          label: Text(
-                                            'Name',
-                                            style: TextStyle(
-                                                color: Color(0xff003756)),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                            label: Text('Present',
-                                                style: TextStyle(
-                                                    color: Color(0xff003756)))),
-                                        DataColumn(
-                                            label: Text('Absent',
-                                                style: TextStyle(
-                                                    color: Color(0xff003756)))),
-                                      ],
-                                      rows: _filteredUser
-                                              ?.asMap()
-                                              .entries
-                                              .map((entry) {
-                                            int index = entry.key;
-                                            var _user = entry.value;
+                                      );
 
-                                            return DataRow(
-                                              cells: [
-                                                DataCell(Text("${index + 1}",style: TextStyle(color: Color(0xFF003756)))),
-                                                DataCell(
-                                                    Text(_user.name == null
-                                                        ? '----'
-                                                        : '${_user.name}',style: TextStyle(color: Color(0xFF003756)),),
-                                                    onTap: () {
-                                                  setState(() {
-                                                    name = _user.name;
-                                                  });
-                                                  Navigator.pushNamed(
-                                                      context,
-                                                      UserAttendanceScreen
-                                                          .routeName,
-                                                      arguments: {
-                                                        'name': name
-                                                      });
-                                                }),
-                                                DataCell(Center(
-                                                  child: Container(
-                                                    height: 22,
-                                                    width: 22,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5),
-                                                      gradient:
-                                                          LinearGradient(colors: [
-                                                        Color(0xFF5278FF),
-                                                        Color(0xFF6C84D9),
-                                                      ]),
-                                                    ),
-                                                    child: Center(
-                                                      child: Text(
-                                                        _user.Present == null
-                                                            ? '----'
-                                                            : '${_user.Present}',
-                                                        style: TextStyle(
-                                                            color: Colors.white),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )),
-                                                DataCell(
-
-                                                  Center(
-                                                    child: Container(
-                                                      height: 22,
-                                                      width: 22,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                                5),
-                                                        gradient: LinearGradient(
-                                                            colors: [
-                                                              Color(0xFFCE3636),
-                                                              Color(0xFFFF0000),
-                                                            ]),
-                                                      ),
-                                                      child: Center(
-                                                        child: Text(_user
-                                                                    .Absent ==
-                                                                null
-                                                            ? '----'
-                                                            : '${_user.Absent}',style: TextStyle(color: Colors.white),),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          }).toList() ??
-                                          [],
-                                    ),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(snapshot.error.toString());
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),
-                            MaterialButton(
-                              onPressed: () async {
-                                var attendanceDetailsList =
-                                    await attendanceDetails();
-                                ExportExcel().exportOverAllData(context, attendanceDetailsList);
-
-                                //   attendanceDetails();
-                              },
-                              child: Container(
-                                height: MediaQuery.of(context).size.height / 14,
-                                width: MediaQuery.of(context).size.width / 1.14,
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.grey.shade200),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(6),
-                                    topRight: Radius.circular(6),
-                                    bottomRight: Radius.circular(25),
-                                    bottomLeft: Radius.circular(25),
-                                  ),
-
-                                  color: Colors.white,
+                                    } else if (snapshot.hasError) {
+                                      return Text(snapshot.error.toString());
+                                    }
+                                    return CircularProgressIndicator();
+                                  },
                                 ),
-                                child: Center(child: Text('Export',style: TextStyle(
-                                    color: Color(
-                                      0xFF5278FF,
+                                MaterialButton(
+                                  onPressed: () async {
+                                    var attendanceDetailsList =
+                                        await attendanceDetails();
+                                    ExportExcel().exportOverAllData(context, attendanceDetailsList);
+
+                                    //   attendanceDetails();
+                                  },
+                                  child: Container(
+                                    height: MediaQuery.of(context).size.height / 15,
+                                    width: MediaQuery.of(context).size.width / 1.16,
+                                    margin: EdgeInsets.only(
+                                        top: 0.1,
+                                        bottom:
+                                        8),
+                                    decoration: BoxDecoration(
+                                      border:
+                                          Border.all(color: Colors.grey.shade200),
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
+                                        bottomRight: Radius.circular(25),
+                                        bottomLeft: Radius.circular(25),
+                                      ),
+
+                                      color: Colors.white,
                                     ),
-                                    decoration: TextDecoration.underline),
-                                )),
-                              ),
-                            )
-                          ],
-                        ),
-                      )),
+                                    child: Center(child: Text('Export',style: TextStyle(
+                                        fontSize: 16,
+
+                                        color: Color(
+                                          0xFF5278FF,
+                                        ),
+                                        decoration: TextDecoration.underline),
+                                    )),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )),
                     ],
                   ),
                 )
@@ -532,3 +466,109 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
 
 
 }
+class _UserDataSource extends DataTableSource {
+  BuildContext context;
+  final List<User> _users;
+  int _rowsPerPage;
+  int _currentPage;
+  var name;
+  String _searchQuery = '';
+
+  _UserDataSource(this._users, this._rowsPerPage, this._currentPage,this.name,this.context);
+
+  void setSearchQuery(String query) {
+    _searchQuery = query.toLowerCase();
+    notifyListeners();
+  }
+
+  @override
+  DataRow? getRow(int index) {
+    final int pageIndex = index ~/ _rowsPerPage;
+    final int pageOffset = pageIndex * _rowsPerPage;
+    final int localIndex = index - pageOffset;
+    if (localIndex >= _users.length) {
+      return null;
+    }
+    final User user = _users[localIndex];
+    if (_searchQuery.isNotEmpty &&
+        !user.name!.toLowerCase().contains(_searchQuery)) {
+      return null;
+    }
+    return DataRow(
+      cells: [
+        DataCell(Text('${pageOffset + localIndex + 1}',style: TextStyle(color: Color(0xFF003756)))),
+        DataCell(
+          InkWell(
+            child: Text(user.name ?? '----',style: TextStyle(color: Color(0xFF003756))),
+            onTap: () {
+              //setState(() {
+                name = user.name;
+              //});
+                Navigator.pushNamed(context, UserAttendanceScreen.routeName,
+                    arguments: {
+                      'name': name
+                    });
+
+            },
+          ),
+        ),
+        DataCell(
+          Center(
+            child: Container(
+              height: 22,
+              width: 22,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF5278FF),
+                    Color(0xFF6C84D9),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  user.Present == null ? '----' : '${user.Present}',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ),
+        DataCell(
+          Center(
+            child: Container(
+              height: 22,
+              width: 22,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFCE3636),
+                    Color(0xFFFF0000),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  user.Absent == null ? '----' : '${user.Absent}',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => _users.length;
+
+  @override
+  int get selectedRowCount => 0;
+}
+

@@ -355,15 +355,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 )
                               ]),
                           SizedBox(
-                            width: MediaQuery.of(context).size.width / 15,
+                            width: MediaQuery.of(context).size.width / 7,
                           ),
-                          Container(
-                            height: MediaQuery.of(context).size.height / 13,
-                            width: MediaQuery.of(context).size.width / 11,
-                            child: SvgPicture.asset(
-                              'assets/images/logo.svg',
-                              alignment: Alignment.topCenter,
-                            ),
+                          SvgPicture.asset(
+                            height: 77,
+                            width:46,
+                            'assets/images/logo.svg',
+                            alignment: Alignment.topRight,
                           ),
                         ],
                       ),
@@ -416,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               minWidth: 38,
                               color: btnColor,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(15),
                               ),
                               child: Text(
                                 _isCheckedIn ? 'Check Out' : 'Check In',
@@ -512,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
 
         await showAccessDialogBox('Office');
-        await compute(updateLoginLocation, email);
+        await updateLoginLocation(email);
       } else {
         await showDeniedDialogBox('Office');
       }
@@ -526,9 +524,9 @@ class _HomeScreenState extends State<HomeScreen> {
           // prefs.setBool('_isCheckedIn', _isCheckedIn);
         });
         await showAccessDialogBox('Nippon Office');
-        await compute(updateLoginLocation, email);
+       // await compute(updateLoginLocation, email);
 
-        //updateLoginLocation(email);
+        updateLoginLocation(email);
       } else {
         showDeniedDialogBox('Nippon Office');
       }
@@ -543,8 +541,8 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       showAccessDialogBox('WFH');
       print('wfh:$Address');
-      // updateLoginLocation(email);
-      await compute(updateLoginLocation, email);
+      await updateLoginLocation(email);
+
     }
   }
 

@@ -1,14 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:iapp/services/exportExcel.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path/path.dart' as path;
-import 'package:excel/excel.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -72,13 +65,20 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      drawer:DrawerComponent(image: 'assets/images/user.png',name: 'Admin',onPress1: (){
-        Navigator.pushNamed(context, AdminHomeScreen.routeName);
-      },
-        onPress2: (){Navigator.pushNamed(context, AdminAttendanceScreen.routeName);},
-        onPress3: (){Navigator.pushNamed(context, LoginScreen.routeName);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("Logged out Successfully".toString())));},
+      drawer: DrawerComponent(
+        image: 'assets/images/user.png',
+        name: 'Admin',
+        onPress1: () {
+          Navigator.pushNamed(context, AdminHomeScreen.routeName);
+        },
+        onPress2: () {
+          Navigator.pushNamed(context, AdminAttendanceScreen.routeName);
+        },
+        onPress3: () {
+          Navigator.pushNamed(context, LoginScreen.routeName);
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Logged out Successfully".toString())));
+        },
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -106,7 +106,6 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                           IconButton(
                             onPressed: () {
                               _scaffoldKey.currentState?.openDrawer();
-
                             },
                             icon: Icon(
                               Icons.menu,
@@ -137,7 +136,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: MediaQuery.of(context).size.height / 8,
+                          height: MediaQuery.of(context).size.height / 10,
                         ),
                         Card(
                           margin: const EdgeInsets.all(30.0),
@@ -209,16 +208,12 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                   builder: (context, snapshot) {
                                     if (snapshot.hasData) {
                                       return Container(
-//                                  width: MediaQuery.of(context).size.width / 1.15,
-
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                1.1,
+                                        width: MediaQuery.of(context).size.width /
+                                            1.1,
                                         decoration: BoxDecoration(
-                                            color: Colors.white,
                                             borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(25),
-                                              topRight: Radius.circular(25),
+                                              topLeft: Radius.circular(18),
+                                              topRight: Radius.circular(18),
                                               bottomRight: Radius.circular(6),
                                               bottomLeft: Radius.circular(6),
                                             ),
@@ -229,9 +224,10 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                                 offset: Offset(0, 2),
                                               )
                                             ]),
-
-                                        child: DataTable(
+                                        child: PaginatedDataTable(
+                                          dataRowHeight: 55,
                                           columnSpacing: 15,
+                                          header: Text('Attendance Details'),
                                           columns: [
                                             DataColumn(label: Text('Date')),
                                             DataColumn(label: Text('Mode')),
@@ -239,87 +235,10 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                             DataColumn(label: Text('Totalhrs')),
                                             DataColumn(label: Text('Remarks')),
                                           ],
-                                          rows: snapshot.data
-                                                  ?.asMap()
-                                                  .entries
-                                                  .map((entry) {
-                                                var _user = entry.value;
-
-                                                return DataRow(
-                                                  cells: [
-                                                    DataCell(Text(
-                                                      "${_user.date == null ? '----' : _user.date == null ? '----' : DateFormat('dd MMM').format(DateTime.parse(_user.date.toString()))}",
-                                                      style: TextStyle(
-                                                          color: Color(
-                                                              0xFF003756)),
-                                                    )),
-                                                    DataCell(
-                                                      Text(
-                                                        _user.workmode == null
-                                                            ? '----'
-                                                            : '${_user.workmode}',
-                                                        style: TextStyle(
-                                                            color: Color(
-                                                                0xFF003756)),
-                                                      ),
-                                                    ),
-                                                    DataCell(
-                                                      Container(
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              '${_user.loginTime}' ==
-                                                                      null
-                                                                  ? '----'
-                                                                  : '${_user.loginTime}',
-                                                              style: TextStyle(
-                                                                  color: Color(
-                                                                      0xFF003756)),
-                                                            ),
-                                                            Text(
-                                                              '${_user.logoutTime}' ==
-                                                                      null
-                                                                  ? '----'
-                                                                  : '${_user.logoutTime}',
-                                                              style: TextStyle(
-                                                                  color: Color(
-                                                                      0xFF003756)),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    DataCell(
-                                                      Text(
-                                                        _user.totalWorkingHours ==
-                                                                null
-                                                            ? '----'
-                                                            : '${_user.totalWorkingHours}',
-                                                        style: TextStyle(
-                                                            color: Color(
-                                                                0xFF003756)),
-                                                      ),
-                                                    ),
-                                                    DataCell(
-                                                      Text(
-                                                        _user.status == null
-                                                            ? '----'
-                                                            : '${_user.status}',
-                                                        style: TextStyle(
-                                                            color: Color(
-                                                                0xFF003756)),
-                                                      ),
-                                                    )
-                                                  ],
-                                                );
-                                              }).toList() ??
-                                              [],
+                                          source: AttendanceDetailsDataSource(
+                                              snapshot.data ?? []),
+                                          rowsPerPage:
+                                              4, // Change the number of rows per page as needed
                                         ),
                                       );
                                     } else if (snapshot.hasError) {
@@ -330,16 +249,21 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                 ),
                                 MaterialButton(
                                   onPressed: () async {
-                                    ExportExcel().exportData(context,_user!);
+                                    ExportExcel().exportData(context, _user!);
                                   },
                                   child: Container(
                                     height:
-                                        MediaQuery.of(context).size.height / 14,
+                                        MediaQuery.of(context).size.height / 17,
                                     width:
-                                        MediaQuery.of(context).size.width / 1,
+                                        MediaQuery.of(context).size.width / 1.12,
+                                    margin: EdgeInsets.only(
+                                        top: 0.1,
+                                        bottom:
+                                            8), // add margin to adjust spacing
+
                                     decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Colors.grey.shade200),
+                                      border:
+                                          Border.all(color: Colors.grey.shade200),
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(6),
                                         topRight: Radius.circular(6),
@@ -352,6 +276,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                         child: Text(
                                       'Export',
                                       style: TextStyle(
+                                          fontSize: 16,
                                           color: Color(
                                             0xFF5278FF,
                                           ),
@@ -397,32 +322,32 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                       sizedBox,
                       Text('$empId' == null ? '----' : '$empId'),
                       Row(
-
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width/5,
-                          ),
+
                           Text(
                             'Digital Transformation Trainee',
                             style: TextStyle(
                                 fontSize: 15, color: Color(0xff003756)),
                           ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 16.0,
-                          ),
-                          Align(
-                              alignment: Alignment.centerRight,
-                              child: SvgPicture.asset(
-                                'assets/images/logo.svg',
-                                height: 60,
-                              )),
+
                         ],
                       ),
                     ],
                   ),
                 ),
               ),
+              Positioned(
+                top: 280,
+                right: 50,
+                child: Align(
+                    alignment: Alignment.centerRight,
+                    child: SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      height: 64,
+                      width: 42,
+                    )),
+              )
             ],
           ),
         ),
@@ -476,5 +401,100 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
       rethrow;
     }
   }
+}
 
+class AttendanceDetailsDataSource extends DataTableSource {
+  final List<User> _attendanceDetails;
+  int _selectedRowCount = 0;
+
+  AttendanceDetailsDataSource(this._attendanceDetails);
+
+  @override
+  DataRow getRow(int index) {
+    final attendanceDetail = _attendanceDetails[index];
+
+    return DataRow.byIndex(
+      index: index,
+      cells: [
+        DataCell(Text(
+          attendanceDetail.date == null
+              ? '----'
+              : attendanceDetail.date == null
+                  ? '----'
+                  : DateFormat('dd MMM')
+                      .format(DateTime.parse(attendanceDetail.date.toString())),
+          style: TextStyle(color: Color(0xFF003756)),
+        )),
+        DataCell(
+          Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  attendanceDetail.workmode == null
+                      ? '------'
+                      : '${attendanceDetail.workmode}',
+                  style: TextStyle(color: Color(0xFF003756)),
+                ),
+                Text(
+                  attendanceDetail.workModeCheckOut == null
+                      ? '------'
+                      : '${attendanceDetail.workModeCheckOut}',
+                  style: TextStyle(color: Color(0xFF003756)),
+                ),
+              ],
+            ),
+          ),
+        ),
+        DataCell(
+          Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  '${attendanceDetail.loginTime}' == null
+                      ? '----'
+                      : '${attendanceDetail.loginTime}',
+                  style: TextStyle(color: Color(0xFF003756)),
+                ),
+                Text(
+                  '${attendanceDetail.logoutTime}' == null
+                      ? '----'
+                      : '${attendanceDetail.logoutTime}',
+                  style: TextStyle(color: Color(0xFF003756)),
+                ),
+              ],
+            ),
+          ),
+        ),
+        DataCell(
+          Text(
+            attendanceDetail.totalWorkingHours == null
+                ? '----'
+                : '${attendanceDetail.totalWorkingHours}',
+            style: TextStyle(color: Color(0xFF003756)),
+          ),
+        ),
+        DataCell(
+          Text(
+            attendanceDetail.status == null
+                ? '----'
+                : '${attendanceDetail.status}',
+            style: TextStyle(color: Color(0xFF003756)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  int get rowCount => _attendanceDetails.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => _selectedRowCount;
 }
