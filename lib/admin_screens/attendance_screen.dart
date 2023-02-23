@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:iapp/services/adminApiClass.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:iapp/admin_screens/home_screen.dart';
@@ -33,9 +34,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   List<User> _filteredUser = [];
   int currentMonth = DateTime.now().month;
   int currentYear = DateTime.now().year;
-  List<User> _filteredUserList = [];
-  int _rowsPerPage =PaginatedDataTable.defaultRowsPerPage;
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _currentPage = 0;
+  final paginatedKey = new GlobalKey<PaginatedDataTableState>();
 
   final dataTableKey = GlobalKey<_AdminAttendanceScreenState>();
 
@@ -79,13 +80,12 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
         _filteredUser = _user as List<User>;
       } else {
         _filteredUser = _filteredUser
-            .where((data) => data.name!.toLowerCase().contains(_searchString!.toLowerCase()))
+            .where((data) =>
+                data.name!.toLowerCase().contains(_searchString!.toLowerCase()))
             .toList();
-
       }
     });
   }
-
 
   void _clearSearch() {
     _searchController.clear();
@@ -98,7 +98,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -207,8 +206,10 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: 'Search',
-                              contentPadding: const EdgeInsets.only(
-                                  left: 14.0, bottom: 12.0, top: 6.0),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12.0,
+                                horizontal: 16.0,
+                              ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(color: Colors.white),
                                 borderRadius: BorderRadius.circular(20.7),
@@ -228,121 +229,132 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                         padding: new EdgeInsets.fromLTRB(8, 8, 8, 8),
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height /22,
+                        height: MediaQuery.of(context).size.height / 22,
                       ),
                       Expanded(
                           child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                FutureBuilder(
-                                  future: _user,
-                                  builder: (context, snapshot) {
-                                    print(snapshot.data);
-                                    print(snapshot.hasData);
-                                    if (snapshot.hasData) {
-                                      return Container(
-                                        height: MediaQuery.of(context).size.height/1.4,
-                                        width: MediaQuery.of(context).size.width /
-                                            1.15,
-                                        decoration: BoxDecoration(
-                                            //borderRadius: BorderRadius.circular(15.0),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black12,
-                                                blurRadius: 15.0,
-                                                offset: Offset(0, 2),
-                                              )
-                                            ]),
-                                        child: PaginatedDataTable(
-                                           arrowHeadColor: Colors.black,
-
-                                          columnSpacing: 15,
-                                          rowsPerPage: _rowsPerPage,
-                                          onRowsPerPageChanged: (newRowsPerPage) {
-                                            setState(() {
-                                              _rowsPerPage = newRowsPerPage!;
-                                            });
-                                          },
-                                          initialFirstRowIndex: 0,
-                                          onPageChanged: (newPage) {
-                                            setState(() {
-                                              _currentPage = newPage;
-                                            });
-                                          },
-                                          columns: [
-
-                                            DataColumn(
-
-                                              label: Text('S.No'),
-
-                                            ),
-                                            DataColumn(
-                                              label: Text('Name'),
-                                            ),
-                                            DataColumn(
-                                              label: Text('Present'),
-                                            ),
-                                            DataColumn(
-                                              label: Text('Absent'),
-                                            ),
-                                          ],
-                                          source: _UserDataSource(
-                                            _filteredUser,
-                                            _rowsPerPage,
-                                            _currentPage,
-                                            name,
-                                            context
-                                          ),
-
-                                        ),
-                                      );
-
-                                    } else if (snapshot.hasError) {
-                                      return Text(snapshot.error.toString());
-                                    }
-                                    return CircularProgressIndicator();
-                                  },
-                                ),
-                                MaterialButton(
-                                  onPressed: () async {
-                                    var attendanceDetailsList =
-                                        await attendanceDetails();
-                                    ExportExcel().exportOverAllData(context, attendanceDetailsList);
-
-                                    //   attendanceDetails();
-                                  },
-                                  child: Container(
-                                    height: MediaQuery.of(context).size.height / 15,
-                                    width: MediaQuery.of(context).size.width / 1.16,
-                                    margin: EdgeInsets.only(
-                                        top: 0.1,
-                                        bottom:
-                                        8),
+                        child: Column(
+                          children: [
+                            FutureBuilder(
+                              future: _user,
+                              builder: (context, snapshot) {
+                                print(snapshot.data);
+                                print(snapshot.hasData);
+                                if (snapshot.hasData) {
+                                  var dataSource = _UserDataSource(
+                                      _filteredUser,
+                                      _rowsPerPage,
+                                      _currentPage,
+                                      name,
+                                      context);
+                                  if (dataSource.rowCount == 0) {
+                                    return Container(
+                                      alignment: Alignment.center,
+                                      child: Text('No data available.'),
+                                    );
+                                  }
+                                  return Container(
+                                    width: MediaQuery.of(context).size.width /
+                                        1.15,
                                     decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                        topRight: Radius.circular(6),
-                                        bottomRight: Radius.circular(25),
-                                        bottomLeft: Radius.circular(25),
-                                      ),
-
-                                      color: Colors.white,
+                                        //borderRadius: BorderRadius.circular(15.0),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black12,
+                                            blurRadius: 15.0,
+                                            offset: Offset(0, 2),
+                                          )
+                                        ]),
+                                    child: PaginatedDataTable(
+                                      key: paginatedKey,
+                                      arrowHeadColor: Colors.black,
+                                      columnSpacing: 15,
+                                      rowsPerPage: _rowsPerPage,
+                                      onRowsPerPageChanged: (newRowsPerPage) {
+                                        setState(() {
+                                          _rowsPerPage = newRowsPerPage!;
+                                        });
+                                      },
+                                      initialFirstRowIndex: 0,
+                                      onPageChanged: (newPage) {
+                                        setState(() {
+                                          _currentPage = newPage;
+                                        });
+                                      },
+                                      columns: [
+                                        DataColumn(
+                                          label: Text('S.No'),
+                                        ),
+                                        DataColumn(
+                                          label: Text('Name'),
+                                        ),
+                                        DataColumn(
+                                          label: Text('Present'),
+                                        ),
+                                        DataColumn(
+                                          label: Text('Absent'),
+                                        ),
+                                      ],
+                                      source: _UserDataSource(
+                                          _filteredUser,
+                                          _rowsPerPage,
+                                          _currentPage,
+                                          name,
+                                          context),
                                     ),
-                                    child: Center(child: Text('Export',style: TextStyle(
-                                        fontSize: 16,
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(snapshot.error.toString());
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            ),
+                            Container(
+                              child: MaterialButton(
+                                onPressed: () async {
+                                  //calling api methods
+                                  var attendanceDetailsList =
+                                      await AdminApiClass().exportByMonth(
+                                          currentMonth, currentYear);
+                                  //exporting datas to excel
+                                  ExportExcel().exportOverAllData(
+                                      context, attendanceDetailsList);
 
+                                  //   attendanceDetails();
+                                },
+                                child: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height / 15,
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.16,
+                                  margin: EdgeInsets.only(top: 0.1, bottom: 8),
+                                  decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: Colors.grey.shade200),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(6),
+                                      topRight: Radius.circular(6),
+                                      bottomRight: Radius.circular(25),
+                                      bottomLeft: Radius.circular(25),
+                                    ),
+                                    color: Colors.white,
+                                  ),
+                                  child: Center(
+                                      child: Text(
+                                    'Export',
+                                    style: TextStyle(
+                                        fontSize: 16,
                                         color: Color(
                                           0xFF5278FF,
                                         ),
                                         decoration: TextDecoration.underline),
-                                    )),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )),
+                                  )),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      )),
                     ],
                   ),
                 )
@@ -381,6 +393,8 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                           }
                           _user = fetchCount(currentMonth, currentYear);
                         });
+                        print(currentMonth);
+                        print(currentYear);
                       },
                     ),
                     SizedBox(
@@ -408,7 +422,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                           }
                           _user = fetchCount(currentMonth, currentYear);
                         });
-                        WidgetsBinding.instance.performReassemble();
                       },
                     ),
                   ],
@@ -429,6 +442,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       if (response.statusCode == 200) {
         var getUsersData = json.decode(response.body) as List;
         print(getUsersData);
+
         var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
         return listUsers;
       } else {
@@ -440,32 +454,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
     }
   }
 
-  Future<List> attendanceDetails() async {
-    try {
-      var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/exportUserAttendenceData';
-      List<dynamic> dataList = [];
-
-      print(api);
-      var response = await http.get(Uri.parse(api));
-      print(response);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> map = json.decode(response.body);
-        for (String key in map.keys) {
-          dataList.add({key: map[key]});
-        }
-        return dataList;
-      } else {
-        throw Exception('Failed to load users');
-      }
-    } catch (e) {
-      print(e);
-      rethrow;
-    }
-  }
-
 
 }
+
 class _UserDataSource extends DataTableSource {
   BuildContext context;
   final List<User> _users;
@@ -474,7 +465,8 @@ class _UserDataSource extends DataTableSource {
   var name;
   String _searchQuery = '';
 
-  _UserDataSource(this._users, this._rowsPerPage, this._currentPage,this.name,this.context);
+  _UserDataSource(this._users, this._rowsPerPage, this._currentPage, this.name,
+      this.context);
 
   void setSearchQuery(String query) {
     _searchQuery = query.toLowerCase();
@@ -494,21 +486,23 @@ class _UserDataSource extends DataTableSource {
         !user.name!.toLowerCase().contains(_searchQuery)) {
       return null;
     }
+    if (user.name == null || user.Present == null || user.Absent == null) {
+      return null;
+    }
     return DataRow(
       cells: [
-        DataCell(Text('${pageOffset + localIndex + 1}',style: TextStyle(color: Color(0xFF003756)))),
+        DataCell(Text('${pageOffset + localIndex + 1}',
+            style: TextStyle(color: Color(0xFF003756)))),
         DataCell(
           InkWell(
-            child: Text(user.name ?? '----',style: TextStyle(color: Color(0xFF003756))),
+            child: Text(user.name ?? '----',
+                style: TextStyle(color: Color(0xFF003756))),
             onTap: () {
               //setState(() {
-                name = user.name;
+              name = user.name;
               //});
-                Navigator.pushNamed(context, UserAttendanceScreen.routeName,
-                    arguments: {
-                      'name': name
-                    });
-
+              Navigator.pushNamed(context, UserAttendanceScreen.routeName,
+                  arguments: {'name': name});
             },
           ),
         ),
@@ -564,11 +558,18 @@ class _UserDataSource extends DataTableSource {
 
   @override
   bool get isRowCountApproximate => false;
-
   @override
-  int get rowCount => _users.length;
+  int get rowCount => _users
+      .where((user) =>
+          user.name != null &&
+          user.Present != null &&
+          user.Absent != null &&
+          user.name!.toLowerCase().contains(_searchQuery))
+      .length;
+  //
+  // @override
+  // int get rowCount => _users.where((user) => user.name!.toLowerCase().contains(_searchQuery)).length;
 
   @override
   int get selectedRowCount => 0;
 }
-

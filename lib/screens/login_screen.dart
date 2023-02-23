@@ -214,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text(
                           'Terms & Conditions Apply',
-                          style: TextStyle(fontSize: 11, color: labels),
+                          style: TextStyle(fontSize: 12, color: labels,decoration: TextDecoration.underline),
                         ),
                       ),
                     ],
@@ -318,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // it not contains @
             }
             else if (!value.contains('@ideassion.com')) {
-              return 'Please Enter Valid Email of @ideassion.com';
+              return 'Please Enter Valid Email of Organization';
             }
             else if (!regExp.hasMatch(value)) {
               return 'Please enter a valid email ';

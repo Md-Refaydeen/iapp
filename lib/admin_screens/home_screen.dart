@@ -129,7 +129,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           Text(
                             'Hello Admin',
                             style: Theme.of(context).textTheme.headline1,
-
                           )
                         ],
                       ),
@@ -145,196 +144,102 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       ),
                       Expanded(
                         child: SingleChildScrollView(
-                          child: FutureBuilder(
-                            future: _user,
-                            builder: (context, snapshot) {
-                              print(snapshot.data);
-                              print(snapshot.hasData);
-                              if (snapshot.hasData) {
-                                return Container(
-                                    width: MediaQuery.of(context).size.width /
-                                        1.15,
-                                    decoration: BoxDecoration(
+                          child: LayoutBuilder(builder: (context, constraints) {
+
+                            return FutureBuilder(
+                              future: _user,
+                              builder: (context, snapshot) {
+                                print(snapshot.data);
+                                print(snapshot.hasData);
+                                if (snapshot.hasData) {
+                                  var attendanceDetails = AttendanceDetailsDataSource(snapshot.data ?? []);
+                                  attendanceDetails.removeEmptyRows();
+                                  if (attendanceDetails.rowCount == 0) {
+                                    return Container(
+                                      alignment: Alignment.center,
+                                      child: Text('No data available.'),
+                                    );
+                                  }
+
+                                  return Container(
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width /
+                                          1.15,
+                                      constraints: BoxConstraints(
+                                        minHeight:
+                                        200, // Set a minim
+                                        // um height
+                                      ),
+                                      decoration: BoxDecoration(
                                         //borderRadius: BorderRadius.circular(15.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 15.0,
-                                            offset: Offset(0, 2),
-                                          )
-                                        ]),
-                                    child: _selectedButton == 1
-                                        ? DataTable(
-                                            columnSpacing: 38,
-                                            headingRowColor:
-                                                MaterialStateColor.resolveWith(
-                                                    (states) => BGcolor),
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(
-                                                  5), // this only make bottom rounded and not top
-                                              color: Colors.white,
-                                            ),
-                                            columns: [
-                                              DataColumn(label: Text('S.No')),
-                                              DataColumn(label: Text('Name')),
-                                              DataColumn(label: Text('Mode')),
-                                              DataColumn(label: Text('Status')),
-                                            ],
-                                            rows: snapshot.data
-                                                    ?.asMap()
-                                                    .entries
-                                                    .map((entry) {
-                                                  int index = entry.key;
-                                                  var _user = entry.value;
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 15.0,
+                                              offset: Offset(0, 2),
+                                            )
+                                          ]),
+                                      child: _selectedButton == 1
+                                          ? PaginatedDataTable(
+                                        rowsPerPage: 10,
+                                          columnSpacing: 15,
 
-                                                  return DataRow(
-                                                    cells: [
-                                                      DataCell(
-                                                          Text("${index + 1}")),
-                                                      DataCell(Text(_user
-                                                                  .name ==
-                                                              null
-                                                          ? '----'
-                                                          : '${_user.name}')),
-                                                      DataCell(Text(_user
-                                                                  .workmode ==
-                                                              null
-                                                          ? '----'
-                                                          : '${_user.workmode}')),
-                                                      DataCell(
-                                                        _user.status == null
-                                                            ? Text('----')
-                                                            : StatusIndicator(
-                                                                status: _user
-                                                                    .status,
-                                                              ),
-                                                      )
-                                                    ],
-                                                  );
-                                                }).toList() ??
-                                                [],
-                                          )
-                                        : _selectedButton == 2
-                                            ? DataTable(
-                                                columnSpacing: 38,
-                                                headingRowColor:
-                                                    MaterialStateColor
-                                                        .resolveWith((states) =>
-                                                            BGcolor),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5), // this only make bottom rounded and not top
-                                                  color: Colors.white,
-                                                ),
-                                                columns: [
-                                                  DataColumn(
-                                                      label: Text('S.No')),
-                                                  DataColumn(
-                                                      label: Text('Name')),
-                                                  DataColumn(
-                                                      label: Text('Mode')),
-                                                  DataColumn(
-                                                      label: Text('Status')),
-                                                ],
-                                                rows: snapshot.data
-                                                        ?.asMap()
-                                                        .entries
-                                                        .map((entry) {
-                                                      int index = entry.key;
-                                                      var _user = entry.value;
+                                          columns: [
+                                            DataColumn(
+                                                label: Text('S.No')),
+                                            DataColumn(
+                                                label: Text('Name')),
+                                            DataColumn(
+                                                label: Text('Mode')),
+                                            DataColumn(
+                                                label: Text('Status')),
+                                          ],
+                                          source: attendanceDetails
+                                      ): _selectedButton == 2
+                                          ? PaginatedDataTable(
+                                          columnSpacing: 15,
+                                          rowsPerPage: 10,
 
-                                                      return DataRow(
-                                                        cells: [
-                                                          DataCell(Text(
-                                                              "${index + 1}")),
-                                                          DataCell(Text(_user
-                                                                      .name ==
-                                                                  null
-                                                              ? '----'
-                                                              : '${_user.name}')),
-                                                          DataCell(Text(_user
-                                                                      .workmode ==
-                                                                  null
-                                                              ? '----'
-                                                              : '${_user.workmode}')),
-                                                          DataCell(
-                                                            _user.status == null
-                                                                ? Text('----')
-                                                                : StatusIndicator(
-                                                                    status: _user
-                                                                        .status,
-                                                                  ),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    }).toList() ??
-                                                    [],
-                                              )
-                                            : DataTable(
-                                                columnSpacing: 38,
-                                                headingRowColor:
-                                                    MaterialStateColor
-                                                        .resolveWith((states) =>
-                                                            BGcolor),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5), // this only make bottom rounded and not top
-                                                  color: Colors.white,
-                                                ),
-                                                columns: [
-                                                  DataColumn(
-                                                      label: Text('S.No')),
-                                                  DataColumn(
-                                                      label: Text('Name')),
-                                                  DataColumn(
-                                                      label: Text('Mode')),
-                                                  DataColumn(
-                                                      label: Text('Status')),
-                                                ],
-                                                rows: snapshot.data
-                                                        ?.asMap()
-                                                        .entries
-                                                        .map((entry) {
-                                                      int index = entry.key;
-                                                      var _user = entry.value;
+                                          columns: [
+                                            DataColumn(
+                                                label: Text('S.No')),
+                                            DataColumn(
+                                                label: Text('Name')),
+                                            DataColumn(
+                                                label: Text('Mode')),
+                                            DataColumn(
+                                                label: Text('Status')),
+                                          ],
+                                          source: attendanceDetails)
 
-                                                      return DataRow(
-                                                        cells: [
-                                                          DataCell(Text(
-                                                              "${index + 1}")),
-                                                          DataCell(Text(_user
-                                                                      .name ==
-                                                                  null
-                                                              ? '----'
-                                                              : '${_user.name}')),
-                                                          DataCell(Text(_user
-                                                                      .workmode ==
-                                                                  null
-                                                              ? '----'
-                                                              : '${_user.workmode}')),
-                                                          DataCell(_user
-                                                                      .status ==
-                                                                  null
-                                                              ? Text('----')
-                                                              : StatusIndicator(
-                                                                  status: _user
-                                                                      .status,
-                                                                ))
-                                                        ],
-                                                      );
-                                                    }).toList() ??
-                                                    [],
-                                              ));
-                              } else if (snapshot.hasError) {
-                                return Text(snapshot.error.toString());
-                              }
-                              return CircularProgressIndicator();
-                            },
+                                          : PaginatedDataTable(
+                                          columnSpacing: 15,
+                                          rowsPerPage: 10,
+
+                                          columns: [
+                                            DataColumn(
+                                                label: Text('S.No')),
+                                            DataColumn(
+                                                label: Text('Name')),
+                                            DataColumn(
+                                                label: Text('Mode')),
+                                            DataColumn(
+                                                label: Text('Status')),
+                                          ],
+                                          source: attendanceDetails)
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(snapshot.error.toString());
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            );
+                          })
                           ),
                         ),
-                      ),
+
                     ],
                   ),
                 ),
@@ -367,10 +272,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           '${location.cdate3}',
                           style: TextStyle(fontSize: 17),
                         ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width / 4,
-                        ),
-                        SvgPicture.asset('assets/images/logo.svg', height: 77),
                       ],
                     ),
                     Row(
@@ -396,11 +297,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               ),
             ),
             Positioned(
-              top: 370,
-              left: 70,
+              top: 400,
+              left: 60,
               child: Column(
                 children: [
                   Container(
+                    height: 60.0,
+                    width: 60.0,
                     decoration: BoxDecoration(
                       color: Color(0xcf7C4CAC),
                       borderRadius: BorderRadius.circular(30),
@@ -413,6 +316,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       icon: Icon(
                         Icons.person,
                         color: Colors.white,
+                        size: 42,
                       ),
                     ),
                   ),
@@ -433,11 +337,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             ),
             Positioned(
               top: 320,
-              left: 140,
-              right: 170,
+              right: 215,
               child: Column(
                 children: [
                   Container(
+                    height: 60.0,
+                    width: 60.0,
                     decoration: BoxDecoration(
                       color: Color(0xcf7C4CAC),
                       borderRadius: BorderRadius.circular(30),
@@ -450,6 +355,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       icon: Icon(
                         Icons.groups,
                         color: Colors.white,
+                        size: 42,
                       ),
                     ),
                   ),
@@ -460,12 +366,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               ),
             ),
             Positioned(
-              top: 370,
-              left: 200.0,
-              right: 10,
+              top: 400,
+              right: 60,
               child: Column(
                 children: [
                   Container(
+                    height: 60.0,
+                    width: 60.0,
                     decoration: BoxDecoration(
                       color: Color(0xcf7C4CAC),
                       borderRadius: BorderRadius.circular(30),
@@ -478,6 +385,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       icon: Icon(
                         Icons.person,
                         color: Colors.white,
+                        size: 42,
                       ),
                     ),
                   ),
@@ -500,6 +408,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 ],
               ),
             ),
+            Positioned(
+              top: MediaQuery.of(context).size.height * 0.17,
+              right: MediaQuery.of(context).size.width * 0.1,
+              child: SvgPicture.asset('assets/images/logo.svg',
+                height: MediaQuery.of(context).size.height * 0.1,
+                width: MediaQuery.of(context).size.width * 0.05,
+
+              ),
+            )
           ]),
         ),
       ),
@@ -549,5 +466,68 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     } catch (error) {
       rethrow;
     }
+  }
+}
+class AttendanceDetailsDataSource extends DataTableSource {
+  final List<User> _attendanceDetails;
+  int _selectedRowCount = 0;
+
+  AttendanceDetailsDataSource(this._attendanceDetails);
+
+  @override
+  DataRow getRow(int index) {
+    final attendanceDetail = _attendanceDetails[index];
+
+    return DataRow.byIndex(
+      index: index,
+      cells: [
+        DataCell(
+            Text("${index + 1}")),
+        DataCell(Text(attendanceDetail.name ==
+            null
+            ? '----'
+            : '${attendanceDetail.name}')),
+        DataCell(Text(attendanceDetail
+            .workmode ==
+            null
+            ? '----'
+            : '${attendanceDetail.workmode}')),
+        DataCell(
+          attendanceDetail.status == null
+              ? StatusIndicator(status: attendanceDetail.status)
+              : StatusIndicator(
+            status: attendanceDetail.status,
+          ),
+        )
+      ],
+    );
+  }
+
+  @override
+  int get rowCount {
+    int count = 0;
+    for (var attendanceDetail in _attendanceDetails) {
+      if (attendanceDetail.name != null ||
+          attendanceDetail.workmode != null ||
+          attendanceDetail.status != null) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => _selectedRowCount;
+
+  void removeEmptyRows() {
+    print('empty eow');
+    _attendanceDetails.removeWhere((attendanceDetail) =>
+    attendanceDetail.name == null &&
+        attendanceDetail.workmode == null &&
+        attendanceDetail.status == null);
+    notifyListeners();
   }
 }

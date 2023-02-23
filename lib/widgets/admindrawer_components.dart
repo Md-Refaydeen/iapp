@@ -27,7 +27,7 @@ class DrawerComponent extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: MediaQuery.of(context).size.width/8,
+                  width: MediaQuery.of(context).size.width/11,
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height / 15,

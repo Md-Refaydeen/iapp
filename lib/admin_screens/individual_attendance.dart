@@ -203,67 +203,90 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
-                                FutureBuilder(
-                                  future: _user,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Container(
-                                        width: MediaQuery.of(context).size.width /
-                                            1.1,
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(18),
-                                              topRight: Radius.circular(18),
-                                              bottomRight: Radius.circular(6),
-                                              bottomLeft: Radius.circular(6),
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black12,
-                                                blurRadius: 15.0,
-                                                offset: Offset(0, 2),
-                                              )
-                                            ]),
-                                        child: PaginatedDataTable(
-                                          dataRowHeight: 55,
-                                          columnSpacing: 15,
-                                          header: Text('Attendance Details'),
-                                          columns: [
-                                            DataColumn(label: Text('Date')),
-                                            DataColumn(label: Text('Mode')),
-                                            DataColumn(label: Text('In & Out')),
-                                            DataColumn(label: Text('Totalhrs')),
-                                            DataColumn(label: Text('Remarks')),
-                                          ],
-                                          source: AttendanceDetailsDataSource(
-                                              snapshot.data ?? []),
-                                          rowsPerPage:
-                                              4, // Change the number of rows per page as needed
-                                        ),
-                                      );
-                                    } else if (snapshot.hasError) {
-                                      return Text(snapshot.error.toString());
-                                    }
-                                    return CircularProgressIndicator();
-                                  },
-                                ),
+                                LayoutBuilder(builder: (context, constraints) {
+                                  return FutureBuilder(
+                                    future: _user,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        var dataSource = AttendanceDetailsDataSource(snapshot.data ?? []);
+                                        if (dataSource.rowCount == 0) {
+                                          return Container(
+                                            alignment: Alignment.center,
+                                            child: Text('No data available.'),
+                                          );
+                                        }
+                                        return Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              1.1,
+                                          constraints: BoxConstraints(
+                                            minHeight:
+                                                200, // Set a mi
+                                          ),
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(18),
+                                                topRight: Radius.circular(18),
+                                                bottomRight: Radius.circular(6),
+                                                bottomLeft: Radius.circular(6),
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black12,
+                                                  blurRadius: 15.0,
+                                                  offset: Offset(0, 2),
+                                                )
+                                              ]),
+                                          child:  PaginatedDataTable(
+                                                  dataRowHeight: 55,
+                                                  columnSpacing: 15,
+
+                                                  columns: [
+                                                    DataColumn(
+                                                        label: Text('Date')),
+                                                    DataColumn(
+                                                        label: Text('Mode')),
+                                                    DataColumn(
+                                                        label:
+                                                            Text('In & Out')),
+                                                    DataColumn(
+                                                        label:
+                                                            Text('Totalhrs')),
+                                                    DataColumn(
+                                                        label: Text('Remarks')),
+                                                  ],
+                                                  source:
+                                                      AttendanceDetailsDataSource(
+                                                          snapshot.data ?? []),
+                                                  rowsPerPage:5, // Change the number of rows per page as needed
+                                                ),
+
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return Text(snapshot.error.toString());
+                                      }
+                                      return CircularProgressIndicator();
+                                    },
+                                  );
+                                }),
                                 MaterialButton(
                                   onPressed: () async {
-                                    ExportExcel().exportData(context, _user!);
+                                    ExportExcel().exportIndividualData(context, _user!);
                                   },
                                   child: Container(
                                     height:
                                         MediaQuery.of(context).size.height / 17,
-                                    width:
-                                        MediaQuery.of(context).size.width / 1.12,
+                                    width: MediaQuery.of(context).size.width /
+                                        1.12,
                                     margin: EdgeInsets.only(
                                         top: 0.1,
                                         bottom:
                                             8), // add margin to adjust spacing
 
                                     decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: Colors.grey.shade200),
+                                      border: Border.all(
+                                          color: Colors.grey.shade200),
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(6),
                                         topRight: Radius.circular(6),
@@ -324,13 +347,11 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-
                           Text(
                             'Digital Transformation Trainee',
                             style: TextStyle(
                                 fontSize: 15, color: Color(0xff003756)),
                           ),
-
                         ],
                       ),
                     ],
@@ -338,8 +359,8 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                 ),
               ),
               Positioned(
-                top: 280,
-                right: 50,
+                top: MediaQuery.of(context).size.height * 0.32,
+                right: MediaQuery.of(context).size.width * 0.1,
                 child: Align(
                     alignment: Alignment.centerRight,
                     child: SvgPicture.asset(
@@ -454,13 +475,13 @@ class AttendanceDetailsDataSource extends DataTableSource {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '${attendanceDetail.loginTime}' == null
+                  '${attendanceDetail.loginTime}'=='null'
                       ? '----'
                       : '${attendanceDetail.loginTime}',
                   style: TextStyle(color: Color(0xFF003756)),
                 ),
                 Text(
-                  '${attendanceDetail.logoutTime}' == null
+                  '${attendanceDetail.logoutTime}' == 'null'
                       ? '----'
                       : '${attendanceDetail.logoutTime}',
                   style: TextStyle(color: Color(0xFF003756)),

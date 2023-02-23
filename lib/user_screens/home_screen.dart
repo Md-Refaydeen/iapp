@@ -30,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   GeoFencingService service = GeoFencingService();
   final Set<Marker> _markers = {};
+  bool _showButton = true;
+  Timer? _buttonTimer;
+
   GoogleMapController? controller;
   String? checkInTime, checkOutTime;
   String? empName, Address;
@@ -49,6 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+  void _hideButton() {
+    setState(() {
+      _showButton = false;
+    });
+    Timer(Duration(seconds: 2), () {
+      setState(() {
+        _showButton = true;
+      });
+    });
+
   }
 
   @override
@@ -289,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  margin: EdgeInsets.zero,
+                  padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
                   width: MediaQuery.of(context).size.width / 1.2,
                   height: MediaQuery.of(context).size.height / 2.5,
                   decoration: BoxDecoration(
@@ -335,6 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF003756)),
                                 ),
+
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
@@ -352,19 +367,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                         style: ButtonStyle(),
                                         child: Text(mode.toString())),
                                   ],
-                                )
+                                ),
                               ]),
+
                           SizedBox(
-                            width: MediaQuery.of(context).size.width / 7,
+                            width: MediaQuery.of(context).size.width / 8,
                           ),
                           SvgPicture.asset(
-                            height: 77,
+                            height: 57,
                             width:46,
                             'assets/images/logo.svg',
                             alignment: Alignment.topRight,
                           ),
+
                         ],
                       ),
+
                       //sizedBox,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -405,7 +423,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 12,
                           ),
-                          Container(
+                          _showButton ?Container(
                             width: 150,
                             height: 38,
                             alignment: Alignment.center,
@@ -427,9 +445,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 } else {
                                   checkIn();
                                 }
-                              },
-                            ),
-                          ),
+                               _hideButton();
+                              }),
+                          ):SizedBox()
                         ],
                       ),
                       Row(

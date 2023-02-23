@@ -13,6 +13,7 @@ class DigitalClockComponent extends StatelessWidget {
       areaDecoration: BoxDecoration(
         color: Colors.transparent,
       ),
+
       hourMinuteDigitTextStyle: TextStyle(
         color: Colors.black87,
         fontSize: 30,
@@ -21,6 +22,7 @@ class DigitalClockComponent extends StatelessWidget {
         color: Colors.black87,
         fontSize: 30,
       ),
+
     );
   }
 }

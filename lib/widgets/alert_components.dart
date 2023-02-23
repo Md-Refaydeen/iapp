@@ -24,7 +24,7 @@ class DialogComponent extends StatelessWidget {
       backgroundColor: Colors.white,
       child: Container(
         height: MediaQuery.of(context).size.height / 2.0,
-        width: MediaQuery.of(context).size.width / 2.0,
+        width: MediaQuery.of(context).size.width / 1.6,
         child: Column(
           children: [
             Image.asset(image, height: 185, width: 170),
