@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iapp/admin_screens/attendance_screen.dart';
 import 'package:iapp/user_screens/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:iapp/services/getLoc_Time.dart';
@@ -62,38 +63,106 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: bgColor,
-        body: SafeArea(
+        body: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return true;
+          },
+          child: SafeArea(
 
-          child: ListView(children: [
-            Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Column(children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height/15,
-                  ),
-                  Image.asset(
-                    'assets/images/Ideassion.png',
-                    height: 158,
-                    width: 650,
-                  ),
-                  sizedBox,
-                  sizedBox,
-                  sizedBox,
-                  sizedBox,
-                  Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height/50,
-                      ),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
+            child: ListView(children: [
+              Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height/15,
+                    ),
+                    Image.asset(
+                      'assets/images/Ideassion.png',
+                      height: 158,
+                      width: 650,
+                    ),
+                    sizedBox,
+                    sizedBox,
+                    sizedBox,
+                    sizedBox,
+                    Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height/50,
+                        ),
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: kDefaultPadding * 2,
+                                      width: kDefaultPadding * 2,
+                                    ),
+                                    Text(
+                                      'Email',
+                                      style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                          color: labels),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width / 3.5,
+                                    ),
+                                    ToggleSwitch(
+                                      minWidth: 72.0,
+                                      minHeight: 40.0,
+                                      initialLabelIndex: _initialLabelIndex,
+                                      cornerRadius: 20.0,
+                                      activeFgColor: Colors.white,
+                                      inactiveBgColor: bgColor,
+                                      inactiveFgColor: Colors.white,
+                                      totalSwitches: 3,
+                                      animate: true, // with just animate set to true, default curve = Curves.easeIn
+                                      curve: Curves.bounceInOut,
+                                      icons: [
+                                        Icons.work_history_rounded,
+                                        Icons.home_work_outlined,
+                                        null
+                                      ],
+
+                                      labels: ['','','Nippon'],
+                                      customTextStyles: [
+                                        null,
+                                        null,
+                                        TextStyle(color: Colors.white,fontSize: 14)
+                                      ],
+
+                                      iconSize: 30.0,
+                                      borderColor: [ attendance,],
+                                      dividerColor: Colors.blueGrey,
+                                      activeBgColors: [ [Color(0xfffeda75), Color(0xfffa7e1e), Color(0xffd62976), Color(0xff962fbf), Color(0xff4f5bd5)],[Color(0xff3b5998), Color(0xff8b9dc3)], [Color(0xff00aeff), Color(0xff0077f2)],],
+                                      onToggle: (index) {
+                                        print('switched to: $index');
+
+                                        textValue = values[index!.toInt()];
+                                        print('Switched to: $textValue');
+
+                                      }
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+
+                              buildEmailField(),
+                              SizedBox(
+                                height: kDefaultPadding,
+                              ),
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   SizedBox(
@@ -101,127 +170,65 @@ class _LoginScreenState extends State<LoginScreen> {
                                     width: kDefaultPadding * 2,
                                   ),
                                   Text(
-                                    'Email',
+                                    'Password',
                                     style: TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
                                         color: labels),
                                   ),
-                                  SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width / 3.5,
-                                  ),
-                                  ToggleSwitch(
-                                    minWidth: 72.0,
-                                    minHeight: 40.0,
-                                    initialLabelIndex: _initialLabelIndex,
-                                    cornerRadius: 20.0,
-                                    activeFgColor: Colors.white,
-                                    inactiveBgColor: bgColor,
-                                    inactiveFgColor: Colors.white,
-                                    totalSwitches: 3,
-                                    animate: true, // with just animate set to true, default curve = Curves.easeIn
-                                    curve: Curves.bounceInOut,
-                                    icons: [
-                                      Icons.work_history_rounded,
-                                      Icons.home_work_outlined,
-                                      null
-                                    ],
-
-                                    labels: ['','','Nippon'],
-                                    customTextStyles: [
-                                      null,
-                                      null,
-                                      TextStyle(color: Colors.white,fontSize: 14)
-                                    ],
-
-                                    iconSize: 30.0,
-                                    borderColor: [ attendance,],
-                                    dividerColor: Colors.blueGrey,
-                                    activeBgColors: [ [Color(0xfffeda75), Color(0xfffa7e1e), Color(0xffd62976), Color(0xff962fbf), Color(0xff4f5bd5)],[Color(0xff3b5998), Color(0xff8b9dc3)], [Color(0xff00aeff), Color(0xff0077f2)],],
-                                    onToggle: (index) {
-                                      print('switched to: $index');
-
-                                      textValue = values[index!.toInt()];
-                                      print('Switched to: $textValue');
-
-                                    }
-                                  ),
-
                                 ],
                               ),
-                            ),
-
-                            buildEmailField(),
-                            SizedBox(
-                              height: kDefaultPadding,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: kDefaultPadding * 2,
-                                  width: kDefaultPadding * 2,
+                              buildPasswordField(),
+                              sizedBox,
+                              MaterialButton(
+                                color: btnColor,
+                                minWidth: 159,
+                                height: 38,
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    signIn(_emailController.text,
+                                        _passwordController.text, textValue);
+                                  }
+                                },
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color: btnColor,
+                                  ),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(23),
+                                    topRight: Radius.circular(23),
+                                    bottomLeft: Radius.circular(23),
+                                    bottomRight: Radius.circular(23),
+                                  ),
                                 ),
-                                Text(
-                                  'Password',
+                                child: Text(
+                                  'Login',
                                   style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      color: labels),
-                                ),
-                              ],
-                            ),
-                            buildPasswordField(),
-                            sizedBox,
-                            MaterialButton(
-                              color: btnColor,
-                              minWidth: 159,
-                              height: 38,
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  signIn(_emailController.text,
-                                      _passwordController.text, textValue);
-                                }
-                              },
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  color: btnColor,
-                                ),
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(23),
-                                  topRight: Radius.circular(23),
-                                  bottomLeft: Radius.circular(23),
-                                  bottomRight: Radius.circular(23),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            sizedBox,
-                          ],
+                              sizedBox,
+                            ],
+                          ),
                         ),
-                      ),
-                      InkWell(
-                        onTap: () {
-
-                        },
-                        child: Text(
-                          'Terms & Conditions Apply',
-                          style: TextStyle(fontSize: 12, color: labels,decoration: TextDecoration.underline),
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, AdminAttendanceScreen.routeName);
+                          },
+                          child: Text(
+                            'Terms & Conditions Apply',
+                            style: TextStyle(fontSize: 12, color: labels,decoration: TextDecoration.underline),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  sizedBox,
-                ])),
-          ]),
+                      ],
+                    ),
+                    sizedBox,
+                  ])),
+            ]),
+          ),
         ));
   }
 
@@ -369,6 +376,8 @@ class _LoginScreenState extends State<LoginScreen> {
           isLoading = false;
         });
       }
+      _emailController.clear();
+      _passwordController.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid Credentials',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w400),),backgroundColor: attendance,));
       setState(() {

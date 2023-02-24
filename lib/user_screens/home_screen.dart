@@ -114,84 +114,90 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      drawer: Drawer(
-        backgroundColor: Colors.purple.shade50,
-        width: MediaQuery.of(context).size.width * 0.7,
-        child: ListView(
-          padding: EdgeInsets.only(top: 65.0),
-          children: <Widget>[
-            IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.arrow_back_ios),
-                alignment: Alignment.topRight),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 15,
-                  width: MediaQuery.of(context).size.width / 5,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/user.png',
+      drawer: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowGlow();
+          return true;
+        },
+        child: Drawer(
+          backgroundColor: Colors.purple.shade50,
+          width: MediaQuery.of(context).size.width * 0.7,
+          child: ListView(
+            padding: EdgeInsets.only(top: 65.0),
+            children: <Widget>[
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back_ios),
+                  alignment: Alignment.topRight),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 15,
+                    width: MediaQuery.of(context).size.width / 5,
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(
+                        'assets/images/user.png',
+                      ),
+                      radius: 30,
                     ),
-                    radius: 30,
                   ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 7,
-                  width: MediaQuery.of(context).size.width / 25,
-                ),
-                Text(
-                  name,
-                  style: TextStyle(fontSize: 20),
-                ),
-              ],
-            ),
-            ListComponents(
-              title: 'Home',
-              iconData: Icons.home_filled,
-              onPress: () {
-                Navigator.pushNamed(context, HomeScreen.routeName,
-                    arguments: {'email': email, 'empName': name, 'mode': mode});
-              },
-            ),
-            ListComponents(
-              title: 'Attendance',
-              iconData: Icons.calendar_today_outlined,
-              onPress: () {
-                Navigator.pushNamed(context, AttendanceScreen.routeName,
-                    arguments: {
-                      'email': email,
-                      'name': name,
-                      'mode': mode,
-                    });
-              },
-            ),
-            ListComponents(
-              title: 'Logout',
-              iconData: Icons.power_settings_new,
-              onPress: () {
-                Navigator.pushNamed(context, LoginScreen.routeName);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Logged out Successfully".toString())));
-              },
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height / 4.0,
-            ),
-            Container(
-              margin:
-                  EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
-              width: MediaQuery.of(context).size.width / 4,
-              height: MediaQuery.of(context).size.height / 10,
-              child: Image.asset(
-                'assets/images/Ideassion.png',
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 7,
+                    width: MediaQuery.of(context).size.width / 25,
+                  ),
+                  Text(
+                    name,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ],
               ),
-            ),
-          ],
+              ListComponents(
+                title: 'Home',
+                iconData: Icons.home_filled,
+                onPress: () {
+                  Navigator.pushNamed(context, HomeScreen.routeName,
+                      arguments: {'email': email, 'empName': name, 'mode': mode});
+                },
+              ),
+              ListComponents(
+                title: 'Attendance',
+                iconData: Icons.calendar_today_outlined,
+                onPress: () {
+                  Navigator.pushNamed(context, AttendanceScreen.routeName,
+                      arguments: {
+                        'email': email,
+                        'name': name,
+                        'mode': mode,
+                      });
+                },
+              ),
+              ListComponents(
+                title: 'Logout',
+                iconData: Icons.power_settings_new,
+                onPress: () {
+                  Navigator.pushNamed(context, LoginScreen.routeName);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Logged out Successfully".toString())));
+                },
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 4.0,
+              ),
+              Container(
+                margin:
+                    EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
+                width: MediaQuery.of(context).size.width / 4,
+                height: MediaQuery.of(context).size.height / 10,
+                child: Image.asset(
+                  'assets/images/Ideassion.png',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       key: _scaffoldKey,
@@ -268,7 +274,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: iconColor,
                     ),
                     onPressed: () {
-                      Navigator.pushNamed(context, LoginScreen.routeName);
                       //print("your menu action here");
                     },
                   ),

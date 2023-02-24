@@ -18,6 +18,7 @@ class DialogComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     print('called');
     return Dialog(
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),

@@ -37,6 +37,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _currentPage = 0;
   final paginatedKey = new GlobalKey<PaginatedDataTableState>();
+  String? _selectedOption;
 
   final dataTableKey = GlobalKey<_AdminAttendanceScreenState>();
 
@@ -58,6 +59,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   @override
   void initState() {
     // TODO: implement initState
+    _clearSearch();
     location.requestPermission();
     location.getDate();
     year = int.parse(location.year);
@@ -103,332 +105,361 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: DrawerComponent(
-        image: 'assets/images/user.png',
-        name: 'Admin',
-        onPress1: () {
-          Navigator.pushNamed(context, AdminHomeScreen.routeName);
+      drawer: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowGlow();
+          return true;
         },
-        onPress2: () {
-          Navigator.pushNamed(context, AdminAttendanceScreen.routeName);
-        },
-        onPress3: () {
-          Navigator.pushNamed(context, LoginScreen.routeName);
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Logged out Successfully".toString())));
-        },
+        child: DrawerComponent(
+          image: 'assets/images/user.png',
+          name: 'Admin',
+          onPress1: () {
+            Navigator.pushNamed(context, AdminHomeScreen.routeName);
+          },
+          onPress2: () {
+            Navigator.pushNamed(context, AdminAttendanceScreen.routeName);
+          },
+          onPress3: () {
+            Navigator.pushNamed(context, LoginScreen.routeName);
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Logged out Successfully".toString())));
+          },
+        ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Stack(children: [
-            Column(
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Color(0xB6B091CF),
-                      Color(0xFFAD8DCD),
-                    ]),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              _scaffoldKey.currentState?.openDrawer();
-                            },
-                            icon: Icon(
-                              Icons.menu,
-                              color: Color(0xFF3F3D56),
-                              size: 23,
-                            ),
-                          ),
-                          IconButton(
+        child: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return true;
+          },
+          child: SingleChildScrollView(
+
+            child: Stack(children: [
+              Column(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 3,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: [
+                        Color(0xB6B091CF),
+                        Color(0xFFAD8DCD),
+                      ]),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 5,
+                        ),
+                        
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
                               onPressed: () {
-                                Navigator.pushNamed(
-                                    context, AdminHomeScreen.routeName);
+                                _scaffoldKey.currentState?.openDrawer();
                               },
                               icon: Icon(
-                                Icons.arrow_circle_left_outlined,
-                                color: Color(0xFF3F3D56),
-                                size: 28,
-                              ))
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(65.0),
-                        child: Text(
-                          'Attendance Details',
-                          style: Theme.of(context).textTheme.headline1,
+                                Icons.menu,
+                                size: 23,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                          context, AdminHomeScreen.routeName);
+                                    },
+                                    icon: Icon(
+                                      Icons.arrow_circle_left_outlined,
+                                      color: Color(0xFF3F3D56),
+                                      size: 28,
+                                    )),
+
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+
+                        Padding(
+                          padding: const EdgeInsets.all(65.0),
+                          child: Text(
+                            'Attendance Details',
+                            style: Theme.of(context).textTheme.headline1,
+                          ),
+                        ),
+
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: adminHomeBG,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        height: MediaQuery.of(context).size.height / 14.5,
-                        child: Theme(
-                          data: Theme.of(context)
-                              .copyWith(splashColor: Colors.transparent),
-                          child: TextField(
-                            controller: _searchController,
-                            autofocus: false,
-                            onChanged: (value) {
-                              _filterUsers(value);
-                            },
-                            style: TextStyle(
-                                fontSize: 15.0, color: Color(0xFFbdc6cf)),
-                            decoration: InputDecoration(
-                              prefixIcon: IconButton(
-                                icon: Icon(Icons.search),
-                                onPressed: () {},
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(Icons.clear),
-                                onPressed: () {
-                                  _clearSearch();
-                                },
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              hintText: 'Search',
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12.0,
-                                horizontal: 16.0,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                                borderRadius: BorderRadius.circular(20.7),
-                              ),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                                borderRadius: BorderRadius.circular(20.7),
+                  Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: adminHomeBG,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width / 1.2,
+                          height: MediaQuery.of(context).size.height / 14.5,
+                          child: Theme(
+                            data: Theme.of(context)
+                                .copyWith(splashColor: Colors.transparent),
+                            child: TextField(
+                              controller: _searchController,
+                              autofocus: false,
+                              onChanged: (value) {
+                                _filterUsers(value);
+                              },
+                              style: TextStyle(
+                                  fontSize: 15.0, color: Color(0xFFbdc6cf)),
+                              decoration: InputDecoration(
+                                prefixIcon: IconButton(
+                                  icon: Icon(Icons.search),
+                                  onPressed: () {},
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(Icons.clear),
+                                  onPressed: () {
+                                    _clearSearch();
+                                  },
+                                ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                hintText: 'Search',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12.0,
+                                  horizontal: 16.0,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                  borderRadius: BorderRadius.circular(20.7),
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                  borderRadius: BorderRadius.circular(20.7),
+                                ),
                               ),
                             ),
                           ),
+                          decoration: new BoxDecoration(
+                              borderRadius:
+                                  new BorderRadius.all(new Radius.circular(20.0)),
+                              color: Colors.white),
+                          margin: new EdgeInsets.fromLTRB(20, 40, 20, 0.0),
+                          padding: new EdgeInsets.fromLTRB(8, 8, 8, 8),
                         ),
-                        decoration: new BoxDecoration(
-                            borderRadius:
-                                new BorderRadius.all(new Radius.circular(20.0)),
-                            color: Colors.white),
-                        margin: new EdgeInsets.fromLTRB(20, 40, 20, 0.0),
-                        padding: new EdgeInsets.fromLTRB(8, 8, 8, 8),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 22,
+                        ),
+                        Expanded(
+                            child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              FutureBuilder(
+                                future: _user,
+                                builder: (context, snapshot) {
+                                  print(snapshot.data);
+                                  print(snapshot.hasData);
+                                  if (snapshot.hasData) {
+                                    var dataSource = _UserDataSource(
+                                        _filteredUser,
+                                        _rowsPerPage,
+                                        _currentPage,
+                                        name,
+                                        context);
+                                    if (dataSource.rowCount == 0) {
+                                      return Container(
+                                        alignment: Alignment.center,
+                                        child: Text('No data available.'),
+                                      );
+                                    }
+                                    return Container(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.15,
+                                      decoration: BoxDecoration(
+                                          //borderRadius: BorderRadius.circular(15.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 15.0,
+                                              offset: Offset(0, 2),
+                                            )
+                                          ]),
+                                      child: PaginatedDataTable(
+                                        key: paginatedKey,
+                                        arrowHeadColor: Colors.black,
+                                        columnSpacing: 15,
+                                        rowsPerPage: _rowsPerPage,
+                                        onRowsPerPageChanged: (newRowsPerPage) {
+                                          setState(() {
+                                            _rowsPerPage = newRowsPerPage!;
+                                          });
+                                        },
+                                        initialFirstRowIndex: 0,
+                                        onPageChanged: (newPage) {
+                                          setState(() {
+                                            _currentPage = newPage;
+                                          });
+                                        },
+                                        columns: [
+                                          DataColumn(
+                                            label: Text('S.No'),
+                                          ),
+                                          DataColumn(
+                                            label: Text('Name'),
+                                          ),
+                                          DataColumn(
+                                            label: Text('Present'),
+                                          ),
+                                          DataColumn(
+                                            label: Text('Absent'),
+                                          ),
+                                        ],
+                                        source: _UserDataSource(
+                                            _filteredUser,
+                                            _rowsPerPage,
+                                            _currentPage,
+                                            name,
+                                            context),
+                                      ),
+                                    );
+                                  } else if (snapshot.hasError) {
+                                    return Text(snapshot.error.toString());
+                                  }
+                                  return CircularProgressIndicator();
+                                },
+                              ),
+                              Container(
+                                child: MaterialButton(
+                                  onPressed: () async {
+                                    //calling api methods
+                                    var attendanceDetailsList =
+                                        await AdminApiClass().exportByMonth(
+                                            currentMonth, currentYear);
+                                    //exporting datas to excel
+                                    ExportExcel().exportOverAllData(
+                                        context, attendanceDetailsList);
+
+                                    //   attendanceDetails();
+                                  },
+                                  child: Container(
+                                    height:
+                                        MediaQuery.of(context).size.height / 15,
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.16,
+                                    margin: EdgeInsets.only(top: 0.1, bottom: 8),
+                                    decoration: BoxDecoration(
+                                      border:
+                                          Border.all(color: Colors.grey.shade200),
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(6),
+                                        bottomRight: Radius.circular(25),
+                                        bottomLeft: Radius.circular(25),
+                                      ),
+                                      color: Colors.white,
+                                    ),
+                                    child: Center(
+                                        child: Text(
+                                      'Export',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color(
+                                            0xFF5278FF,
+                                          ),
+                                          decoration: TextDecoration.underline),
+                                    )),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        )),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              Positioned(
+                top: MediaQuery.of(context).size.height/4.50,
+                right: 20,
+                  child: IconButton(onPressed: () {
+                        showOptions(context);
+                  }, icon: Icon(Icons.filter_list_off_rounded,
+                    color: Color(0xFF3F3D56),
+
+                  ),)),
+              Positioned(
+                top: MediaQuery.of(context).size.height / 3.25,
+                left: 44,
+                right: 49,
+                child: Container(
+                  height: 40,
+                  width: 282,
+                  decoration: BoxDecoration(
+                      color: BGcolor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15.0,
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                      borderRadius: BorderRadius.circular(20.0)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        color: Color(0xff3F3D56),
+                        iconSize: 25,
+                        icon: Icon(Icons.chevron_left),
+                        onPressed: () {
+                          setState(() {
+                            currentMonth--;
+                            if (currentMonth == 0) {
+                              currentMonth = 12;
+                              currentYear--;
+                            }
+                            _user = fetchCount(currentMonth, currentYear);
+                          });
+                          print(currentMonth);
+                          print(currentYear);
+                        },
                       ),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height / 22,
+                        width: 50,
                       ),
-                      Expanded(
-                          child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            FutureBuilder(
-                              future: _user,
-                              builder: (context, snapshot) {
-                                print(snapshot.data);
-                                print(snapshot.hasData);
-                                if (snapshot.hasData) {
-                                  var dataSource = _UserDataSource(
-                                      _filteredUser,
-                                      _rowsPerPage,
-                                      _currentPage,
-                                      name,
-                                      context);
-                                  if (dataSource.rowCount == 0) {
-                                    return Container(
-                                      alignment: Alignment.center,
-                                      child: Text('No data available.'),
-                                    );
-                                  }
-                                  return Container(
-                                    width: MediaQuery.of(context).size.width /
-                                        1.15,
-                                    decoration: BoxDecoration(
-                                        //borderRadius: BorderRadius.circular(15.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 15.0,
-                                            offset: Offset(0, 2),
-                                          )
-                                        ]),
-                                    child: PaginatedDataTable(
-                                      key: paginatedKey,
-                                      arrowHeadColor: Colors.black,
-                                      columnSpacing: 15,
-                                      rowsPerPage: _rowsPerPage,
-                                      onRowsPerPageChanged: (newRowsPerPage) {
-                                        setState(() {
-                                          _rowsPerPage = newRowsPerPage!;
-                                        });
-                                      },
-                                      initialFirstRowIndex: 0,
-                                      onPageChanged: (newPage) {
-                                        setState(() {
-                                          _currentPage = newPage;
-                                        });
-                                      },
-                                      columns: [
-                                        DataColumn(
-                                          label: Text('S.No'),
-                                        ),
-                                        DataColumn(
-                                          label: Text('Name'),
-                                        ),
-                                        DataColumn(
-                                          label: Text('Present'),
-                                        ),
-                                        DataColumn(
-                                          label: Text('Absent'),
-                                        ),
-                                      ],
-                                      source: _UserDataSource(
-                                          _filteredUser,
-                                          _rowsPerPage,
-                                          _currentPage,
-                                          name,
-                                          context),
-                                    ),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(snapshot.error.toString());
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),
-                            Container(
-                              child: MaterialButton(
-                                onPressed: () async {
-                                  //calling api methods
-                                  var attendanceDetailsList =
-                                      await AdminApiClass().exportByMonth(
-                                          currentMonth, currentYear);
-                                  //exporting datas to excel
-                                  ExportExcel().exportOverAllData(
-                                      context, attendanceDetailsList);
-
-                                  //   attendanceDetails();
-                                },
-                                child: Container(
-                                  height:
-                                      MediaQuery.of(context).size.height / 15,
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.16,
-                                  margin: EdgeInsets.only(top: 0.1, bottom: 8),
-                                  decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: Colors.grey.shade200),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(6),
-                                      topRight: Radius.circular(6),
-                                      bottomRight: Radius.circular(25),
-                                      bottomLeft: Radius.circular(25),
-                                    ),
-                                    color: Colors.white,
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    'Export',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Color(
-                                          0xFF5278FF,
-                                        ),
-                                        decoration: TextDecoration.underline),
-                                  )),
-                                ),
-                              ),
-                            )
-                          ],
+                      Text(
+                        "${months[currentMonth - 1]} - $currentYear",
+                        style: TextStyle(fontSize: 17, color: Color(0xFF003756)),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 12,
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.chevron_right,
                         ),
-                      )),
+                        iconSize: 25,
+                        color: Color(0xff3F3D56),
+                        onPressed: () {
+                          setState(() {
+                            currentMonth++;
+                            if (currentMonth == 13) {
+                              currentMonth = 1;
+                              currentYear++;
+                            }
+                            _user = fetchCount(currentMonth, currentYear);
+                          });
+                        },
+                      ),
                     ],
                   ),
-                )
-              ],
-            ),
-            Positioned(
-              top: MediaQuery.of(context).size.height / 3.25,
-              left: 44,
-              right: 49,
-              child: Container(
-                height: 40,
-                width: 282,
-                decoration: BoxDecoration(
-                    color: BGcolor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 15.0,
-                        offset: Offset(0, 2),
-                      )
-                    ],
-                    borderRadius: BorderRadius.circular(20.0)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      color: Color(0xff3F3D56),
-                      iconSize: 25,
-                      icon: Icon(Icons.chevron_left),
-                      onPressed: () {
-                        setState(() {
-                          currentMonth--;
-                          if (currentMonth == 0) {
-                            currentMonth = 12;
-                            currentYear--;
-                          }
-                          _user = fetchCount(currentMonth, currentYear);
-                        });
-                        print(currentMonth);
-                        print(currentYear);
-                      },
-                    ),
-                    SizedBox(
-                      width: 50,
-                    ),
-                    Text(
-                      "${months[currentMonth - 1]} - $currentYear",
-                      style: TextStyle(fontSize: 17, color: Color(0xFF003756)),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 12,
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.chevron_right,
-                      ),
-                      iconSize: 25,
-                      color: Color(0xff3F3D56),
-                      onPressed: () {
-                        setState(() {
-                          currentMonth++;
-                          if (currentMonth == 13) {
-                            currentMonth = 1;
-                            currentYear++;
-                          }
-                          _user = fetchCount(currentMonth, currentYear);
-                        });
-                      },
-                    ),
-                  ],
                 ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       ),
     );
@@ -454,8 +485,32 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
     }
   }
 
+  void showOptions(BuildContext context) async {
+    final result = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromLTRB(1000, 250, 40, 0),
+      items: [
+        PopupMenuItem(
 
+          child: Text("Select Date"),
+          value: "Select Date",
+        ),
+        PopupMenuItem(
+          child: Text("Over All"),
+          value: "Over All",
+        ),
+      ],
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedOption = result;
+      });
+    }
+    print(result);
+  }
 }
+
 
 class _UserDataSource extends DataTableSource {
   BuildContext context;

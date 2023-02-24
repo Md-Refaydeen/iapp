@@ -81,295 +81,302 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
         },
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 3,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [
-                        Color(0xB6B091CF),
-                        Color(0xFFAD8DCD),
+        child: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return true;
+          },
+
+          child: SingleChildScrollView(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 3,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [
+                          Color(0xB6B091CF),
+                          Color(0xFFAD8DCD),
+                        ]),
+                      ),
+                      child: Row(children: [
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            sizedBox,
+                            IconButton(
+                              onPressed: () {
+                                _scaffoldKey.currentState?.openDrawer();
+                              },
+                              icon: Icon(
+                                Icons.menu,
+                                color: Color(0xFF3F3D56),
+                                size: 23,
+                              ),
+                            ),
+                            sizedBox,
+                            sizedBox,
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                      context, AdminAttendanceScreen.routeName);
+                                },
+                                icon: Icon(
+                                  Icons.arrow_circle_left_outlined,
+                                  color: Color(0xFF3F3D56),
+                                  size: 28,
+                                )),
+                          ],
+                        ),
                       ]),
                     ),
-                    child: Row(children: [
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                    Container(
+                      height: MediaQuery.of(context).size.height,
+                      width: MediaQuery.of(context).size.width,
+                      color: adminHomeBG,
+                      child: Column(
                         children: [
-                          sizedBox,
-                          IconButton(
-                            onPressed: () {
-                              _scaffoldKey.currentState?.openDrawer();
-                            },
-                            icon: Icon(
-                              Icons.menu,
-                              color: Color(0xFF3F3D56),
-                              size: 23,
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height / 10,
+                          ),
+                          Card(
+                            margin: const EdgeInsets.all(30.0),
+                            elevation: 10.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(25),
+                              ),
+                              side: BorderSide(color: Colors.white, width: 2.0),
+                            ),
+                            child: TableCalendar(
+                              onPageChanged: (d) {
+                                year = d.year;
+                                month = d.month;
+
+                                // checkStatus(email, month, year);
+                              },
+                              selectedDayPredicate: (day) =>
+                                  isSameDay(day, _selectedDate),
+                              firstDay: DateTime.utc(2010, 10, 16),
+                              lastDay: DateTime.utc(2050, 3, 14),
+                              calendarFormat: CalendarFormat.month,
+                              calendarBuilders: CalendarBuilders(
+                                selectedBuilder: (context, date, events) =>
+                                    Container(
+                                        margin: const EdgeInsets.all(5.0),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                            color: Colors.blue.shade100,
+                                            borderRadius:
+                                                BorderRadius.circular(25)),
+                                        child: Text(
+                                          date.day.toString(),
+                                          style: TextStyle(color: Colors.white),
+                                        )),
+                              ),
+                              focusedDay: DateTime.now(),
+                              calendarStyle: CalendarStyle(
+                                selectedDecoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                todayDecoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(25))),
+                                weekendTextStyle: TextStyle(color: Colors.blue),
+                              ),
+                              headerStyle: HeaderStyle(
+                                formatButtonShowsNext: false,
+                                titleCentered: true,
+                              ),
+                              onDaySelected: (date, events) {
+                                setState(() {
+                                  _selectedDate = date;
+                                  print(_selectedDate);
+                                  // fetchData(email, _selectedDate);
+                                });
+                              },
                             ),
                           ),
                           sizedBox,
-                          sizedBox,
-                          IconButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                    context, AdminAttendanceScreen.routeName);
-                              },
-                              icon: Icon(
-                                Icons.arrow_circle_left_outlined,
-                                color: Color(0xFF3F3D56),
-                                size: 28,
-                              )),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  LayoutBuilder(builder: (context, constraints) {
+                                    return FutureBuilder(
+                                      future: _user,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          var dataSource = AttendanceDetailsDataSource(snapshot.data ?? []);
+                                          if (dataSource.rowCount == 0) {
+                                            return Container(
+                                              alignment: Alignment.center,
+                                              child: Text('No data available.'),
+                                            );
+                                          }
+                                          return Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                1.1,
+                                            constraints: BoxConstraints(
+                                              minHeight:
+                                                  200, // Set a mi
+                                            ),
+                                            decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(18),
+                                                  topRight: Radius.circular(18),
+                                                  bottomRight: Radius.circular(6),
+                                                  bottomLeft: Radius.circular(6),
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 15.0,
+                                                    offset: Offset(0, 2),
+                                                  )
+                                                ]),
+                                            child:  PaginatedDataTable(
+                                                    dataRowHeight: 55,
+                                                    columnSpacing: 15,
+
+                                                    columns: [
+                                                      DataColumn(
+                                                          label: Text('Date')),
+                                                      DataColumn(
+                                                          label: Text('Mode')),
+                                                      DataColumn(
+                                                          label:
+                                                              Text('In & Out')),
+                                                      DataColumn(
+                                                          label:
+                                                              Text('Totalhrs')),
+                                                      DataColumn(
+                                                          label: Text('Remarks')),
+                                                    ],
+                                                    source:
+                                                        AttendanceDetailsDataSource(
+                                                            snapshot.data ?? []),
+                                                    rowsPerPage:5, // Change the number of rows per page as needed
+                                                  ),
+
+                                          );
+                                        } else if (snapshot.hasError) {
+                                          return Text(snapshot.error.toString());
+                                        }
+                                        return CircularProgressIndicator();
+                                      },
+                                    );
+                                  }),
+                                  MaterialButton(
+                                    onPressed: () async {
+                                      ExportExcel().exportIndividualData(context, _user!);
+                                    },
+                                    child: Container(
+                                      height:
+                                          MediaQuery.of(context).size.height / 17,
+                                      width: MediaQuery.of(context).size.width /
+                                          1.12,
+                                      margin: EdgeInsets.only(
+                                          top: 0.1,
+                                          bottom:
+                                              8), // add margin to adjust spacing
+
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: Colors.grey.shade200),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(6),
+                                          topRight: Radius.circular(6),
+                                          bottomRight: Radius.circular(25),
+                                          bottomLeft: Radius.circular(25),
+                                        ),
+                                        color: Colors.white,
+                                      ),
+                                      child: Center(
+                                          child: Text(
+                                        'Export',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color(
+                                              0xFF5278FF,
+                                            ),
+                                            decoration: TextDecoration.underline),
+                                      )),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                    ]),
-                  ),
-                  Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: adminHomeBG,
+                    )
+                  ],
+                ),
+                Positioned(
+                  top: 160,
+                  left: 50,
+                  right: 40,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 4.4,
+                    width: MediaQuery.of(context).size.width / 1,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 15.0,
+                            offset: Offset(2, 4),
+                          )
+                        ]),
                     child: Column(
                       children: [
                         SizedBox(
-                          height: MediaQuery.of(context).size.height / 10,
+                          height: MediaQuery.of(context).size.height / 20,
                         ),
-                        Card(
-                          margin: const EdgeInsets.all(30.0),
-                          elevation: 10.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(25),
-                            ),
-                            side: BorderSide(color: Colors.white, width: 2.0),
-                          ),
-                          child: TableCalendar(
-                            onPageChanged: (d) {
-                              year = d.year;
-                              month = d.month;
-
-                              // checkStatus(email, month, year);
-                            },
-                            selectedDayPredicate: (day) =>
-                                isSameDay(day, _selectedDate),
-                            firstDay: DateTime.utc(2010, 10, 16),
-                            lastDay: DateTime.utc(2050, 3, 14),
-                            calendarFormat: CalendarFormat.month,
-                            calendarBuilders: CalendarBuilders(
-                              selectedBuilder: (context, date, events) =>
-                                  Container(
-                                      margin: const EdgeInsets.all(5.0),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                          color: Colors.blue.shade100,
-                                          borderRadius:
-                                              BorderRadius.circular(25)),
-                                      child: Text(
-                                        date.day.toString(),
-                                        style: TextStyle(color: Colors.white),
-                                      )),
-                            ),
-                            focusedDay: DateTime.now(),
-                            calendarStyle: CalendarStyle(
-                              selectedDecoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              todayDecoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(25))),
-                              weekendTextStyle: TextStyle(color: Colors.blue),
-                            ),
-                            headerStyle: HeaderStyle(
-                              formatButtonShowsNext: false,
-                              titleCentered: true,
-                            ),
-                            onDaySelected: (date, events) {
-                              setState(() {
-                                _selectedDate = date;
-                                print(_selectedDate);
-                                // fetchData(email, _selectedDate);
-                              });
-                            },
-                          ),
+                        Text(
+                          '$name' == null ? '---' : name,
+                          style: TextStyle(fontSize: 24),
                         ),
                         sizedBox,
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                LayoutBuilder(builder: (context, constraints) {
-                                  return FutureBuilder(
-                                    future: _user,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        var dataSource = AttendanceDetailsDataSource(snapshot.data ?? []);
-                                        if (dataSource.rowCount == 0) {
-                                          return Container(
-                                            alignment: Alignment.center,
-                                            child: Text('No data available.'),
-                                          );
-                                        }
-                                        return Container(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              1.1,
-                                          constraints: BoxConstraints(
-                                            minHeight:
-                                                200, // Set a mi
-                                          ),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(18),
-                                                topRight: Radius.circular(18),
-                                                bottomRight: Radius.circular(6),
-                                                bottomLeft: Radius.circular(6),
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black12,
-                                                  blurRadius: 15.0,
-                                                  offset: Offset(0, 2),
-                                                )
-                                              ]),
-                                          child:  PaginatedDataTable(
-                                                  dataRowHeight: 55,
-                                                  columnSpacing: 15,
-
-                                                  columns: [
-                                                    DataColumn(
-                                                        label: Text('Date')),
-                                                    DataColumn(
-                                                        label: Text('Mode')),
-                                                    DataColumn(
-                                                        label:
-                                                            Text('In & Out')),
-                                                    DataColumn(
-                                                        label:
-                                                            Text('Totalhrs')),
-                                                    DataColumn(
-                                                        label: Text('Remarks')),
-                                                  ],
-                                                  source:
-                                                      AttendanceDetailsDataSource(
-                                                          snapshot.data ?? []),
-                                                  rowsPerPage:5, // Change the number of rows per page as needed
-                                                ),
-
-                                        );
-                                      } else if (snapshot.hasError) {
-                                        return Text(snapshot.error.toString());
-                                      }
-                                      return CircularProgressIndicator();
-                                    },
-                                  );
-                                }),
-                                MaterialButton(
-                                  onPressed: () async {
-                                    ExportExcel().exportIndividualData(context, _user!);
-                                  },
-                                  child: Container(
-                                    height:
-                                        MediaQuery.of(context).size.height / 17,
-                                    width: MediaQuery.of(context).size.width /
-                                        1.12,
-                                    margin: EdgeInsets.only(
-                                        top: 0.1,
-                                        bottom:
-                                            8), // add margin to adjust spacing
-
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                        topRight: Radius.circular(6),
-                                        bottomRight: Radius.circular(25),
-                                        bottomLeft: Radius.circular(25),
-                                      ),
-                                      color: Colors.white,
-                                    ),
-                                    child: Center(
-                                        child: Text(
-                                      'Export',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: Color(
-                                            0xFF5278FF,
-                                          ),
-                                          decoration: TextDecoration.underline),
-                                    )),
-                                  ),
-                                ),
-                              ],
+                        Text('$empId' == null ? '----' : '$empId'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Digital Transformation Trainee',
+                              style: TextStyle(
+                                  fontSize: 15, color: Color(0xff003756)),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
-                  )
-                ],
-              ),
-              Positioned(
-                top: 160,
-                left: 50,
-                right: 40,
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 4.4,
-                  width: MediaQuery.of(context).size.width / 1,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15.0),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 15.0,
-                          offset: Offset(2, 4),
-                        )
-                      ]),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height / 20,
-                      ),
-                      Text(
-                        '$name' == null ? '---' : name,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                      sizedBox,
-                      Text('$empId' == null ? '----' : '$empId'),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Digital Transformation Trainee',
-                            style: TextStyle(
-                                fontSize: 15, color: Color(0xff003756)),
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
                 ),
-              ),
-              Positioned(
-                top: MediaQuery.of(context).size.height * 0.32,
-                right: MediaQuery.of(context).size.width * 0.1,
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: SvgPicture.asset(
-                      'assets/images/logo.svg',
-                      height: 64,
-                      width: 42,
-                    )),
-              )
-            ],
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.32,
+                  right: MediaQuery.of(context).size.width * 0.1,
+                  child: Align(
+                      alignment: Alignment.centerRight,
+                      child: SvgPicture.asset(
+                        'assets/images/logo.svg',
+                        height: 64,
+                        width: 42,
+                      )),
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:iapp/widgets/alertbox.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../constants/constants.dart';
 import '../dto/user.dart';
@@ -47,6 +48,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
   Future<void> check() async {
     Future.delayed(const Duration(milliseconds: 500), () {
+      showAlert();
+
       setState(() {
         year = int.parse(location.year);
         month = int.parse(location.month);
@@ -55,9 +58,11 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       _user = fetchDetails(email, month, year);
       checkStatus(email, month, year);
     });
+
   }
 
   void showToast() {
+
     setState(() {
       _isVisible = !_isVisible;
     });
@@ -75,84 +80,90 @@ class _CalendarScreenState extends State<AttendanceScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.purple.shade50,
-      drawer: Drawer(
-        backgroundColor: Colors.purple.shade50,
-        width: MediaQuery.of(context).size.width * 0.7,
-        child: ListView(
-          padding: EdgeInsets.only(top: 65.0),
-          children: <Widget>[
-            IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(Icons.arrow_back_ios),
-                alignment: Alignment.topRight),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 15,
-                  width: MediaQuery.of(context).size.width / 8,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage(
-                      'assets/images/user.png',
+      drawer: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowGlow();
+          return true;
+        },
+        child: Drawer(
+          backgroundColor: Colors.purple.shade50,
+          width: MediaQuery.of(context).size.width * 0.7,
+          child: ListView(
+            padding: EdgeInsets.only(top: 65.0),
+            children: <Widget>[
+              IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back_ios),
+                  alignment: Alignment.topRight),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 15,
+                    width: MediaQuery.of(context).size.width / 8,
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(
+                        'assets/images/user.png',
+                      ),
+                      radius: 30,
                     ),
-                    radius: 30,
                   ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 7,
-                  width: MediaQuery.of(context).size.width / 25,
-                ),
-                Text(
-                  name,
-                  style: TextStyle(fontSize: 20),
-                ),
-              ],
-            ),
-            ListComponents(
-              title: 'Home',
-              iconData: Icons.home_filled,
-              onPress: () {
-                Navigator.pushNamed(context, HomeScreen.routeName, arguments: {
-                  'email': email,
-                  'empName': name,
-                  'mode': wmode
-                });
-                print(wmode);
-              },
-            ),
-            ListComponents(
-              title: 'Attendance',
-              iconData: Icons.calendar_today_outlined,
-              onPress: () {
-                Navigator.pushNamed(context, AttendanceScreen.routeName,
-                    arguments: {'email': email, 'name': name});
-              },
-            ),
-            ListComponents(
-              title: 'Logout',
-              iconData: Icons.power_settings_new,
-              onPress: () {
-                Navigator.pushNamed(context, LoginScreen.routeName);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Logged out Successfully".toString())));
-              },
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height / 9.5,
-            ),
-            Container(
-              margin:
-                  EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
-              width: MediaQuery.of(context).size.width / 4,
-              height: MediaQuery.of(context).size.height / 10,
-              child: Image.asset(
-                'assets/images/Ideassion.png',
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 7,
+                    width: MediaQuery.of(context).size.width / 25,
+                  ),
+                  Text(
+                    name,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ],
               ),
-            ),
-          ],
+              ListComponents(
+                title: 'Home',
+                iconData: Icons.home_filled,
+                onPress: () {
+                  Navigator.pushNamed(context, HomeScreen.routeName, arguments: {
+                    'email': email,
+                    'empName': name,
+                    'mode': wmode
+                  });
+                  print(wmode);
+                },
+              ),
+              ListComponents(
+                title: 'Attendance',
+                iconData: Icons.calendar_today_outlined,
+                onPress: () {
+                  Navigator.pushNamed(context, AttendanceScreen.routeName,
+                      arguments: {'email': email, 'name': name});
+                },
+              ),
+              ListComponents(
+                title: 'Logout',
+                iconData: Icons.power_settings_new,
+                onPress: () {
+                  Navigator.pushNamed(context, LoginScreen.routeName);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Logged out Successfully".toString())));
+                },
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 9.5,
+              ),
+              Container(
+                margin:
+                    EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
+                width: MediaQuery.of(context).size.width / 4,
+                height: MediaQuery.of(context).size.height / 10,
+                child: Image.asset(
+                  'assets/images/Ideassion.png',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: SafeArea(
@@ -228,7 +239,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                             return Container(
                               height: 5,
                               decoration: BoxDecoration(
-                                  color: status == "Present"
+                                  color: status == "Present"||status=='Late'
                                       ? Colors.green
                                       : Colors.red,
                                   shape: BoxShape.circle),
@@ -294,6 +305,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                               icon: Icon(Icons.info),
                               color: Color(0xFFFFC701)),
                           Text('Tap to view Attendance Details'),
+
                         ],
                       ),
                     ),
@@ -530,6 +542,16 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       ),
     );
   }
+  Future <void> showAlert()async {
+     showDialog(context: context, builder: (_)=>AlertBox(
+
+     )
+
+     );
+     Future.delayed(Duration(seconds: 3), () {
+       Navigator.of(context).pop();
+     });
+  }
 
   Future<void> checkStatus(String? email, int? month, int? year) async {
     try {
@@ -620,25 +642,22 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
         var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
         for (var item in getUsersData) {
-          setState(() {
+
             //widget.date = DateTime.parse(item['date'].split(' ')[0]);
+            var date = DateTime.parse(item['date']);
+            var status = item['status'];
 
-            widget.date = DateTime.parse(item['date']);
-            widget.status = item['status'];
-          });
 
-          // Add the event to the events map
-          if (_events[widget.date] == null) {
-            _events[widget.date] = [widget.status];
-            //  print(_events[widget.date]);
+          if (_events[date] == null) {
+            _events[date] = [status];
           } else {
-            _events[widget.date]?.add(widget.status);
+            _events[date]?.add(status);
           }
-          print(_events[widget.date]);
-          print('date:${widget.date}');
-          print(_events[widget.status]);
+          print('s${_events[date]}');
+            print('ss${_events[status]}');
+          print('date:${date}');
         }
-        print(_events);
+
         return listUsers;
       } else {
         throw Exception('Failed to load users');
@@ -648,16 +667,13 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       rethrow;
     }
   }
-
-  List<dynamic> _getEvents(DateTime date) {
-    String formattedDate = DateFormat("yyyy-MM-dd").format(date);
+  List<String> _getEvents(DateTime date) {
+    String formattedDate = DateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
     // Retrieve the list of events for the formatted date
-    var statuses = _events[date] ?? [];
+    var statuses = _events[formattedDate] ?? [];
     print('statuses:$statuses');
-    // _events.forEach((date, statuses) {
-    //   print('$date: $statuses');
-    // });
 
-    return statuses;
+    return statuses.map((status) => status.toString()).toList();
   }
+
 }
