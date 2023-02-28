@@ -359,11 +359,17 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
 
+      _emailController.clear();
+      _passwordController.clear();
       if(name==adminName && empEmail==user.empEmailId){
         Navigator.pushNamed(context, AdminHomeScreen.routeName);
+
       }else {
         Navigator.pushNamed(context, HomeScreen.routeName,
             arguments: {'email': empEmail, 'empName': name, 'mode': mode});
+
+        _emailController.clear();
+        _passwordController.clear();
       }
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('logged in Successfully'.toString())));
@@ -376,8 +382,6 @@ class _LoginScreenState extends State<LoginScreen> {
           isLoading = false;
         });
       }
-      _emailController.clear();
-      _passwordController.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid Credentials',style: TextStyle(fontSize: 15,fontWeight: FontWeight.w400),),backgroundColor: attendance,));
       setState(() {

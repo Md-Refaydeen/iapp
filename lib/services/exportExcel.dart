@@ -7,10 +7,11 @@ import 'package:path/path.dart' as path;
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 
-class ExportExcel{
-  Future<void> exportOverAllData(BuildContext context,List attendanceDetails) async {
+class ExportExcel {
+  Future<void> exportOverMonth(
+      BuildContext context, List attendanceDetails) async {
     var excel =
-    Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
+        Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
     Sheet sheetObject = excel['OverAll Report'];
     sheetObject.setColWidth(0, 22.0);
     sheetObject.setColWidth(1, 22.0);
@@ -22,8 +23,6 @@ class ExportExcel{
     sheetObject.setColWidth(7, 25.0);
     sheetObject.setColWidth(8, 20.0);
     sheetObject.setColWidth(9, 20.0);
-
-
 
     sheetObject.appendRow([
       "Employee Name",
@@ -95,9 +94,11 @@ class ExportExcel{
       ),
     );
   }
-  Future<void> exportByWeek(BuildContext context,List attendanceDetails) async {
+
+  Future<void> exportOverRange(
+      BuildContext context, List attendanceDetails) async {
     var excel =
-    Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
+        Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
     Sheet sheetObject = excel['OverAll Report'];
     sheetObject.setColWidth(0, 22.0);
     sheetObject.setColWidth(1, 22.0);
@@ -109,8 +110,6 @@ class ExportExcel{
     sheetObject.setColWidth(7, 25.0);
     sheetObject.setColWidth(8, 20.0);
     sheetObject.setColWidth(9, 20.0);
-
-
 
     sheetObject.appendRow([
       "Employee Name",
@@ -182,11 +181,13 @@ class ExportExcel{
       ),
     );
   }
-  Future<void> exportIndividualData(BuildContext context,Future<List<User>> data) async {
+
+  Future<void> exportIndividualData(
+      BuildContext context, Future<List<User>> data) async {
     List<User> users = await data;
 
     var excel =
-    Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
+        Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
     Sheet sheetObject = excel['Individual Report'];
     CellStyle headerStyle = CellStyle(
         backgroundColorHex: "#0000FF",
@@ -211,7 +212,6 @@ class ExportExcel{
     sheetObject.setColWidth(4, 20.0);
     sheetObject.setColWidth(5, 20.0);
     sheetObject.setColWidth(6, 40.0);
-
 
     sheetObject.appendRow([
       "Employee Name",

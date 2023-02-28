@@ -162,7 +162,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                               },
                               selectedDayPredicate: (day) =>
                                   isSameDay(day, _selectedDate),
-                              firstDay: DateTime.utc(2010, 10, 16),
+                              firstDay: DateTime.utc(2018, 10, 16),
                               lastDay: DateTime.utc(2050, 3, 14),
                               calendarFormat: CalendarFormat.month,
                               calendarBuilders: CalendarBuilders(

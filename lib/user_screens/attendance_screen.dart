@@ -26,6 +26,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   Future<List<User>>? _user;
   Map<DateTime, List<dynamic>> _events = {};
+  bool isDataAvailable = true;
 
   Location location = Location();
   DateTime? _selectedDate, _dates;
@@ -48,7 +49,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
   Future<void> check() async {
     Future.delayed(const Duration(milliseconds: 500), () {
-      showAlert();
+
 
       setState(() {
         year = int.parse(location.year);
@@ -58,11 +59,9 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       _user = fetchDetails(email, month, year);
       checkStatus(email, month, year);
     });
-
   }
 
   void showToast() {
-
     setState(() {
       _isVisible = !_isVisible;
     });
@@ -125,11 +124,12 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                 title: 'Home',
                 iconData: Icons.home_filled,
                 onPress: () {
-                  Navigator.pushNamed(context, HomeScreen.routeName, arguments: {
-                    'email': email,
-                    'empName': name,
-                    'mode': wmode
-                  });
+                  Navigator.pushNamed(context, HomeScreen.routeName,
+                      arguments: {
+                        'email': email,
+                        'empName': name,
+                        'mode': wmode
+                      });
                   print(wmode);
                 },
               ),
@@ -154,8 +154,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                 height: MediaQuery.of(context).size.height / 9.5,
               ),
               Container(
-                margin:
-                    EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
+                margin: EdgeInsets.only(
+                    top: kDefaultPadding, right: kDefaultPadding),
                 width: MediaQuery.of(context).size.width / 4,
                 height: MediaQuery.of(context).size.height / 10,
                 child: Image.asset(
@@ -239,7 +239,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                             return Container(
                               height: 5,
                               decoration: BoxDecoration(
-                                  color: status == "Present"||status=='Late'
+                                  color: status == "Present" || status == 'Late'
                                       ? Colors.green
                                       : Colors.red,
                                   shape: BoxShape.circle),
@@ -305,7 +305,6 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                               icon: Icon(Icons.info),
                               color: Color(0xFFFFC701)),
                           Text('Tap to view Attendance Details'),
-
                         ],
                       ),
                     ),
@@ -370,7 +369,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                     thickness: 1,
                                     color: Color(0xFF5C5C5C),
                                   ),
-                                  Row(
+                                  isDataAvailable? Row(
                                     mainAxisSize: MainAxisSize.max,
                                     // crossAxisAlignment: WrapCrossAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.start,
@@ -413,7 +412,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                           ? '$remarks'
                                           : '-----'),
                                     ],
-                                  ),
+                                  ):Center(child: Text('No Data Available'),),
                                 ],
                               ),
                             ),
@@ -542,15 +541,12 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       ),
     );
   }
-  Future <void> showAlert()async {
-     showDialog(context: context, builder: (_)=>AlertBox(
 
-     )
-
-     );
-     Future.delayed(Duration(seconds: 3), () {
-       Navigator.of(context).pop();
-     });
+  Future<void> showAlert() async {
+    showDialog(context: context, builder: (_) => AlertBox());
+    Future.delayed(Duration(seconds: 3), () {
+      Navigator.of(context).pop();
+    });
   }
 
   Future<void> checkStatus(String? email, int? month, int? year) async {
@@ -600,6 +596,10 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       var jsonResponse;
       final response = await http.get(url);
       if (response.statusCode == 200) {
+        setState(() {
+          isDataAvailable = true; // set flag to true after successful fetch
+          // update other state variables as before
+        });
         jsonResponse = jsonDecode(response.body.toString());
         // var UserDetails = jsonResponse['userId'];
         checkInTime = jsonResponse["loginTime"];
@@ -622,11 +622,19 @@ class _CalendarScreenState extends State<AttendanceScreen> {
           rdate = dayFormat.format(dt);
         });
       } else {
+        setState(() {
+          isDataAvailable = false;
+        });
         throw response.statusCode;
       }
     } catch (error) {
       print(error);
+      setState(() {
+        isDataAvailable = false;
+      });
+      //ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('No Data Available',style: TextStyle(fontSize: 15),) ,backgroundColor: attendance,));
       rethrow;
+
     }
   }
 
@@ -642,11 +650,9 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
         var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
         for (var item in getUsersData) {
-
-            //widget.date = DateTime.parse(item['date'].split(' ')[0]);
-            var date = DateTime.parse(item['date']);
-            var status = item['status'];
-
+          //widget.date = DateTime.parse(item['date'].split(' ')[0]);
+          var date = DateTime.parse(item['date']);
+          var status = item['status'];
 
           if (_events[date] == null) {
             _events[date] = [status];
@@ -654,7 +660,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
             _events[date]?.add(status);
           }
           print('s${_events[date]}');
-            print('ss${_events[status]}');
+          print('ss${_events[status]}');
           print('date:${date}');
         }
 
@@ -667,6 +673,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       rethrow;
     }
   }
+
   List<String> _getEvents(DateTime date) {
     String formattedDate = DateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
     // Retrieve the list of events for the formatted date
@@ -675,5 +682,4 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
     return statuses.map((status) => status.toString()).toList();
   }
-
 }
