@@ -24,6 +24,8 @@ class AttendanceScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<AttendanceScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  bool _isInkwellEnabled = true;
+
   Future<List<User>>? _user;
   Map<DateTime, List<dynamic>> _events = {};
   bool isDataAvailable = true;
@@ -39,6 +41,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   final dateFormat = DateFormat('yyyy-MM-dd');
   final dayFormat = DateFormat('d E');
   var email, name;
+  bool _showAlert = false;
+
 
   @override
   void initState() {
@@ -62,9 +66,15 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   }
 
   void showToast() {
+
     setState(() {
       _isVisible = !_isVisible;
+      _showAlert = !_showAlert;
+
     });
+    showAlert();
+
+
   }
 
   @override
@@ -327,6 +337,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
+                            SizedBox(width: 10,),
                             Text(rdate != null ? '$rdate' : '---'),
                             VerticalDivider(
                               color: Color(0xFF5C5C5C),
@@ -543,10 +554,11 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> showAlert() async {
-    showDialog(context: context, builder: (_) => AlertBox());
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.of(context).pop();
-    });
+    if(_showAlert){
+      showDialog(context: context, builder: (_) => AlertBox());
+
+    }
+
   }
 
   Future<void> checkStatus(String? email, int? month, int? year) async {

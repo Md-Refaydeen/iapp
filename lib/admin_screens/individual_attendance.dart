@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:iapp/services/adminApiClass.dart';
 import 'package:iapp/services/exportExcel.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -23,15 +25,21 @@ class UserAttendanceScreen extends StatefulWidget {
 
 class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   String? checkInTime, checkOutTime;
   String? empName, workhrs, remarks, mode, rdate;
   DateTime? _selectedDate, _dates;
   int? month, year;
+  List<User> _attendanceDetailsList = []; // initial empty list
+
   Location location = Location();
   var name;
   var empId, emailId;
+  String? formattedStartDate, formattedEndDate;
   Future<List<User>>? _user;
+  DateTime? _rangeStart, _rangeEnd;
+  Timer? _clearSelectionTimer;
+  AttendanceDetailsDataSource dataSource = AttendanceDetailsDataSource([]);
 
   @override
   void initState() {
@@ -49,6 +57,10 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
       await fetchData(name);
       print('email$emailId');
       _user = fetchDetails(emailId, month, year);
+      fetchDetails(emailId, month, year).then((value) {
+        print('value');
+        _attendanceDetailsList = value;
+      });
       await location.requestPermission();
     });
   }
@@ -86,7 +98,6 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
             overscroll.disallowGlow();
             return true;
           },
-
           child: SingleChildScrollView(
             child: Stack(
               children: [
@@ -154,52 +165,164 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                               side: BorderSide(color: Colors.white, width: 2.0),
                             ),
                             child: TableCalendar(
-                              onPageChanged: (d) {
-                                year = d.year;
-                                month = d.month;
-
-                                // checkStatus(email, month, year);
-                              },
                               selectedDayPredicate: (day) =>
                                   isSameDay(day, _selectedDate),
                               firstDay: DateTime.utc(2018, 10, 16),
                               lastDay: DateTime.utc(2050, 3, 14),
                               calendarFormat: CalendarFormat.month,
                               calendarBuilders: CalendarBuilders(
-                                selectedBuilder: (context, date, events) =>
-                                    Container(
-                                        margin: const EdgeInsets.all(5.0),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
+                                selectedBuilder: (context, date, events) {
+                                  // Check if the date is within the selected range
+                                  if (_rangeSelectionMode ==
+                                      RangeSelectionMode.toggledOn) {
+                                    if (_rangeStart != null &&
+                                        _rangeEnd != null) {
+                                      if (isSameDay(date, _rangeStart)) {
+                                        // Show dark purple color for start date
+                                        return Container(
+                                          margin: const EdgeInsets.all(5.0),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: Colors.purple.shade700,
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                          child: Text(
+                                            date.day.toString(),
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      } else if (isSameDay(date, _rangeEnd)) {
+                                        // Show dark purple color for end date
+                                        return Container(
+                                          margin: const EdgeInsets.all(5.0),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: Colors.purple.shade700,
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                          child: Text(
+                                            date.day.toString(),
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      } else if (date.isAfter(_rangeStart!) &&
+                                          date.isBefore(_rangeEnd!)) {
+                                        // Show light purple color for dates between start and end
+                                        return Container(
+                                          margin: const EdgeInsets.all(5.0),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: Colors.purple.shade300,
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                          ),
+                                          child: Text(
+                                            date.day.toString(),
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      } else {
+                                        // Show default selected style for non-range dates
+                                        return Container(
+                                          margin: const EdgeInsets.all(5.0),
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
                                             color: Colors.blue.shade100,
                                             borderRadius:
-                                                BorderRadius.circular(25)),
-                                        child: Text(
-                                          date.day.toString(),
-                                          style: TextStyle(color: Colors.white),
-                                        )),
+                                                BorderRadius.circular(25),
+                                          ),
+                                          child: Text(
+                                            date.day.toString(),
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } else {
+                                    // Show default selected style for non-range dates
+                                    return Container(
+                                      margin: const EdgeInsets.all(5.0),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade100,
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      child: Text(
+                                        date.day.toString(),
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
                               focusedDay: DateTime.now(),
                               calendarStyle: CalendarStyle(
                                 selectedDecoration: BoxDecoration(
                                   color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(25),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                todayDecoration: BoxDecoration(
-                                    color: Colors.green,
+                                todayDecoration: const BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    color: Color(0xFF7C4CAC),
                                     borderRadius:
-                                        BorderRadius.all(Radius.circular(25))),
+                                        BorderRadius.all(Radius.circular(15))),
                                 weekendTextStyle: TextStyle(color: Colors.blue),
                               ),
                               headerStyle: HeaderStyle(
                                 formatButtonShowsNext: false,
                                 titleCentered: true,
                               ),
+                              rangeSelectionMode: _rangeSelectionMode,
+                              rangeStartDay: _rangeStart,
+                              rangeEndDay: _rangeEnd,
+                              onRangeSelected: (start, end, focused) async {
+                                _rangeStart = start;
+                                _rangeEnd = end;
+
+                                setState(() {
+                                  _rangeSelectionMode =
+                                      RangeSelectionMode.toggledOn;
+                                  focused = _rangeStart!;
+                                  // _clearSelectionTimer = Timer(Duration(seconds: 10), () {
+                                  //   setState(() {
+                                  //     _rangeStart = null;
+                                  //     _rangeEnd = null;
+                                  //     _rangeSelectionMode = RangeSelectionMode.toggledOff;
+                                  //   });
+                                  // });
+                                });
+                                print('StartDate:$_rangeStart');
+                                print('endDate:$_rangeEnd');
+                                print('focusedDay:$focused');
+                                formattedStartDate = DateFormat('yyyy-MM-dd')
+                                    .format(_rangeStart!);
+                                formattedEndDate = _rangeEnd != null
+                                    ? DateFormat('yyyy-MM-dd')
+                                        .format(_rangeEnd!)
+                                    : '';
+
+                                List<User> users = await AdminApiClass()
+                                    .individualRangeDate(emailId,
+                                        formattedStartDate, formattedEndDate);
+                                print('user:$users');
+                                setState(() {
+                                  _attendanceDetailsList = users;
+                                  dataSource = AttendanceDetailsDataSource(
+                                      _attendanceDetailsList);
+                                });
+                              },
                               onDaySelected: (date, events) {
                                 setState(() {
                                   _selectedDate = date;
                                   print(_selectedDate);
-                                  // fetchData(email, _selectedDate);
+                                  _rangeSelectionMode =
+                                      RangeSelectionMode.toggledOff;
                                 });
                               },
                             ),
@@ -209,12 +332,15 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                             child: SingleChildScrollView(
                               child: Column(
                                 children: [
-                                  LayoutBuilder(builder: (context, constraints) {
+                                  LayoutBuilder(
+                                      builder: (context, constraints) {
                                     return FutureBuilder(
                                       future: _user,
                                       builder: (context, snapshot) {
                                         if (snapshot.hasData) {
-                                          var dataSource = AttendanceDetailsDataSource(snapshot.data ?? []);
+                                          dataSource =
+                                              AttendanceDetailsDataSource(
+                                                  snapshot.data ?? []);
                                           if (dataSource.rowCount == 0) {
                                             return Container(
                                               alignment: Alignment.center,
@@ -227,15 +353,16 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                                     .width /
                                                 1.1,
                                             constraints: BoxConstraints(
-                                              minHeight:
-                                                  200, // Set a mi
+                                              minHeight: 200, // Set a mi
                                             ),
                                             decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.only(
                                                   topLeft: Radius.circular(18),
                                                   topRight: Radius.circular(18),
-                                                  bottomRight: Radius.circular(6),
-                                                  bottomLeft: Radius.circular(6),
+                                                  bottomRight:
+                                                      Radius.circular(6),
+                                                  bottomLeft:
+                                                      Radius.circular(6),
                                                 ),
                                                 boxShadow: [
                                                   BoxShadow(
@@ -244,33 +371,51 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                                     offset: Offset(0, 2),
                                                   )
                                                 ]),
-                                            child:  PaginatedDataTable(
-                                                    dataRowHeight: 55,
-                                                    columnSpacing: 15,
+                                            child: PaginatedDataTable(
+                                              dataRowHeight: 55,
+                                              columnSpacing: 15,
+                                              header: Text('Individual Report'),
+                                              columns: [
+                                                DataColumn(label: Text('Date')),
+                                                DataColumn(label: Text('Mode')),
+                                                DataColumn(
+                                                    label: Text('In & Out')),
+                                                DataColumn(
+                                                    label: Text('Totalhrs')),
+                                                DataColumn(
+                                                    label: Text('Remarks')),
+                                              ],
+                                              actions: [
+                                                IconButton(
+                                                  icon: Icon(Icons.refresh),
+                                                  onPressed: () async {
+                                                    print('onPress called');
+                                                    List<User> users=await fetchDetails(emailId, month, year);
+                                                    setState(() {
+                                                      formattedStartDate = null;
+                                                      formattedEndDate = null;
 
-                                                    columns: [
-                                                      DataColumn(
-                                                          label: Text('Date')),
-                                                      DataColumn(
-                                                          label: Text('Mode')),
-                                                      DataColumn(
-                                                          label:
-                                                              Text('In & Out')),
-                                                      DataColumn(
-                                                          label:
-                                                              Text('Totalhrs')),
-                                                      DataColumn(
-                                                          label: Text('Remarks')),
-                                                    ],
-                                                    source:
-                                                        AttendanceDetailsDataSource(
-                                                            snapshot.data ?? []),
-                                                    rowsPerPage:5, // Change the number of rows per page as needed
-                                                  ),
+                                                      _attendanceDetailsList = users;
+                                                      dataSource = AttendanceDetailsDataSource(
+                                                          _attendanceDetailsList);
+                                                      _rangeSelectionMode = RangeSelectionMode.toggledOn;
 
+
+                                                    });
+                                                  },
+                                                )
+                                              ],
+
+                                              source:
+                                                  AttendanceDetailsDataSource(
+                                                      _attendanceDetailsList),
+                                              rowsPerPage:
+                                                  5, // Change the number of rows per page as needed
+                                            ),
                                           );
                                         } else if (snapshot.hasError) {
-                                          return Text(snapshot.error.toString());
+                                          return Text(
+                                              snapshot.error.toString());
                                         }
                                         return CircularProgressIndicator();
                                       },
@@ -278,11 +423,35 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                   }),
                                   MaterialButton(
                                     onPressed: () async {
-                                      ExportExcel().exportIndividualData(context, _user!);
+                                      print('formatstart:$formattedStartDate');
+                                      print('formatEnd:$formattedEndDate');
+
+                                      List<User> attendanceDetails;
+                                      if (formattedStartDate != null &&
+                                          formattedEndDate != null) {
+                                        print('range dates');
+                                        attendanceDetails =
+                                            await AdminApiClass()
+                                                .individualRangeDate(
+                                                    emailId,
+                                                    formattedStartDate,
+                                                    formattedEndDate);
+                                        ExportExcel().exportIndividualData(
+                                            context, attendanceDetails);
+                                      } else {
+                                        //month wise data
+                                        print('month dates');
+
+                                        attendanceDetails = await fetchDetails(
+                                            emailId, month, year);
+                                        ExportExcel().exportIndividualData(
+                                            context, attendanceDetails);
+                                      }
                                     },
                                     child: Container(
                                       height:
-                                          MediaQuery.of(context).size.height / 17,
+                                          MediaQuery.of(context).size.height /
+                                              17,
                                       width: MediaQuery.of(context).size.width /
                                           1.12,
                                       margin: EdgeInsets.only(
@@ -309,7 +478,8 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                             color: Color(
                                               0xFF5278FF,
                                             ),
-                                            decoration: TextDecoration.underline),
+                                            decoration:
+                                                TextDecoration.underline),
                                       )),
                                     ),
                                   ),
@@ -482,7 +652,7 @@ class AttendanceDetailsDataSource extends DataTableSource {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '${attendanceDetail.loginTime}'=='null'
+                  '${attendanceDetail.loginTime}' == 'null'
                       ? '----'
                       : '${attendanceDetail.loginTime}',
                   style: TextStyle(color: Color(0xFF003756)),

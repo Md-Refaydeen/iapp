@@ -63,11 +63,10 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
     location.getDate();
     year = int.parse(location.year);
     month = int.parse(location.month);
-    _user = fetchCount(currentMonth, currentYear);
+    _user = AdminApiClass().fetchCount(currentMonth, currentYear);
 
-    fetchCount(month, year).then((value) {
+    AdminApiClass().fetchCount(month, year).then((value) {
       setState(() {
-        print(value);
         _filteredUser = value;
       });
     });
@@ -91,7 +90,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   void _clearSearch() {
     _searchController.clear();
     setState(() {
-      fetchCount(month, year).then((value) {
+     AdminApiClass().fetchCount(month, year).then((value) {
         setState(() {
           print(value);
           _filteredUser = value;
@@ -282,7 +281,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                           ]),
                                       child: PaginatedDataTable(
                                         header: Text('Attendance Details'),
-
                                         key: paginatedKey,
                                         arrowHeadColor: Colors.black,
                                         columnSpacing: 15,
@@ -299,14 +297,17 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                           });
                                         },
                                         actions: [
-                                          IconButton(icon: Icon(Icons.refresh), onPressed: () {
-                                            print('onPress called');
-                                            _clearSearch();
-                                            setState(() {
-                                              formattedStartDate = null;
-                                              formattedEndDate = null;
-                                            });
-                                          },)
+                                          IconButton(
+                                            icon: Icon(Icons.refresh),
+                                            onPressed: () {
+                                              print('onPress called');
+                                              _clearSearch();
+                                              setState(() {
+                                                formattedStartDate = null;
+                                                formattedEndDate = null;
+                                              });
+                                            },
+                                          )
                                         ],
                                         columns: [
                                           DataColumn(
@@ -340,27 +341,34 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                 child: MaterialButton(
                                   onPressed: () async {
                                     var attendanceDetailsList;
+                                    var attendanceCount;
                                     //fordate range
                                     print(formattedEndDate);
                                     if (formattedStartDate != null &&
                                         formattedEndDate != null) {
                                       print('range api');
                                       //calling api method of data
+                                      attendanceCount=await AdminApiClass()
+                                          .exportByRangeCount(formattedStartDate, formattedEndDate);
+
                                       attendanceDetailsList =
                                           await AdminApiClass().exportByRange(
                                               formattedStartDate,
                                               formattedEndDate);
+
                                       //calling export excel method
-                                      ExportExcel().exportOverRange(context, attendanceDetailsList);
+                                      ExportExcel().exportOverRange(
+                                          context, attendanceDetailsList,attendanceCount);
                                     } else {
                                       //calling api methods
                                       print('month wise');
+                                      attendanceCount=AdminApiClass().fetchCount(currentMonth, currentYear);
                                       attendanceDetailsList =
                                           await AdminApiClass().exportByMonth(
                                               currentMonth, currentYear);
                                       //exporting datas to excel
                                       ExportExcel().exportOverMonth(
-                                          context, attendanceDetailsList);
+                                          context, attendanceDetailsList,attendanceCount);
 
                                       //   attendanceDetails();
                                     }
@@ -440,16 +448,16 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                         color: Color(0xff3F3D56),
                         iconSize: 25,
                         icon: Icon(Icons.chevron_left),
-                        onPressed: () async{
-                          setState(()  {
+                        onPressed: () async {
+                          setState(() {
                             currentMonth--;
                             if (currentMonth == 0) {
                               currentMonth = 12;
                               currentYear--;
                             }
-
                           });
-                          List<User> userList = await fetchCount(currentMonth, currentYear);
+                          List<User> userList =
+                              await AdminApiClass().fetchCount(currentMonth, currentYear);
                           setState(() {
                             _filteredUser = userList; // update the data source
                             _userDataSource = _UserDataSource(
@@ -489,9 +497,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               currentMonth = 1;
                               currentYear++;
                             }
-
                           });
-                          List<User> userList = await fetchCount(currentMonth, currentYear);
+                          List<User> userList =
+                              await AdminApiClass().fetchCount(currentMonth, currentYear);
                           setState(() {
                             _filteredUser = userList; // update the data source
                             _userDataSource = _UserDataSource(
@@ -502,7 +510,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               context,
                             );
                           });
-
                         },
                       ),
                     ],
@@ -516,26 +523,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
     );
   }
 
-  Future<List<User>> fetchCount(int? month, int? year) async {
-    try {
-      var response = await http.get(Uri.parse(
-          'http://ems-ma.ideassionlive.in/api/UserActivity/countAllStatusByMonth?month=$month&year=$year'));
-      print(response.statusCode);
-      print(response);
-      if (response.statusCode == 200) {
-        var getUsersData = json.decode(response.body) as List;
-        print(getUsersData);
-
-        var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
-        return listUsers;
-      } else {
-        throw Exception('Failed to load users');
-      }
-    } catch (e) {
-      print(e);
-      rethrow;
-    }
-  }
 
   void showOptions(BuildContext context) async {
     final result = await showMenu<String>(
@@ -618,9 +605,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       },
     ).then((dateRange) {
       if (dateRange != null) {
- // make API call with selected date range
+        // make API call with selected date range
         print("Selected date range: ${dateRange.start} - ${dateRange.end}");
- // make API call here using the selected date range
+        // make API call here using the selected date range
         DateTime startDate = dateRange.start;
         DateTime endDate = dateRange.end;
         formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
@@ -747,6 +734,7 @@ class _UserDataSource extends DataTableSource {
       ],
     );
   }
+
 
   @override
   bool get isRowCountApproximate => false;

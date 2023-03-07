@@ -8,10 +8,24 @@ import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ExportExcel {
-  Future<void> exportOverMonth(
-      BuildContext context, List attendanceDetails) async {
+  Future<void> exportOverMonth(BuildContext context, List attendanceDetails,
+      Future<List<User>> attendanceCount) async {
     var excel =
         Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
+    List<User> users = await attendanceCount;
+    Sheet sheet = excel['Sheet1'];
+    sheet.setColWidth(0, 30); // sets the width of column A to 20
+    sheet.setColWidth(1, 10); // sets the width of column B to 30
+    sheet.setColWidth(2, 10); //
+    excel.appendRow('Sheet1', ["Name", "Present", "Absent"]);
+
+    excel.appendRow('Sheet1', []);
+    for (int i = 0; i < users.length; i++) {
+      User user = users[i];
+      print(user.name);
+      excel.appendRow('Sheet1', [user.name, user.Present, user.Absent]);
+    }
+
     Sheet sheetObject = excel['OverAll Report'];
     sheetObject.setColWidth(0, 22.0);
     sheetObject.setColWidth(1, 22.0);
@@ -95,10 +109,31 @@ class ExportExcel {
     );
   }
 
-  Future<void> exportOverRange(
-      BuildContext context, List attendanceDetails) async {
+  Future<void> exportOverRange(BuildContext context, List attendanceDetails,
+      List attendanceCount) async {
     var excel =
         Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
+
+    Sheet sheet = excel['Sheet1'];
+    sheet.setColWidth(0, 30); // sets the width of column A to 20
+    sheet.setColWidth(1, 10); // sets the width of column B to 30
+    sheet.setColWidth(2, 10); //
+    CellStyle style = CellStyle(
+        verticalAlign: VerticalAlign.Center,
+        horizontalAlign: HorizontalAlign.Center);
+    excel.appendRow(
+      'Sheet1',
+      ["Name", "Present", "Absent"],
+    );
+
+    excel.appendRow('Sheet1', []);
+    for (var count in attendanceCount) {
+      excel.appendRow(
+        'Sheet1',
+        [count['name'], count['Present'], count['Absent']],
+      );
+    }
+
     Sheet sheetObject = excel['OverAll Report'];
     sheetObject.setColWidth(0, 22.0);
     sheetObject.setColWidth(1, 22.0);
@@ -111,18 +146,20 @@ class ExportExcel {
     sheetObject.setColWidth(8, 20.0);
     sheetObject.setColWidth(9, 20.0);
 
-    sheetObject.appendRow([
-      "Employee Name",
-      "Attendance Date",
-      "Time in",
-      'Login Location',
-      "WorkMode",
-      "Time Out",
-      "Logout Location",
-      "WorkModeCheckOut",
-      "Total Time",
-      "Status"
-    ]);
+    sheetObject.appendRow(
+      [
+        "Employee Name",
+        "Attendance Date",
+        "Time in",
+        'Login Location',
+        "WorkMode",
+        "Time Out",
+        "Logout Location",
+        "WorkModeCheckOut",
+        "Total Time",
+        "Status"
+      ],
+    );
 
     for (var attendance in attendanceDetails) {
       for (String key in attendance.keys) {
@@ -183,12 +220,12 @@ class ExportExcel {
   }
 
   Future<void> exportIndividualData(
-      BuildContext context, Future<List<User>> data) async {
+      BuildContext context, List<User> data) async {
     List<User> users = await data;
 
     var excel =
         Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
-    Sheet sheetObject = excel['Individual Report'];
+    Sheet sheetObject = excel[''];
     CellStyle headerStyle = CellStyle(
         backgroundColorHex: "#0000FF",
         fontSize: 30,

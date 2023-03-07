@@ -45,6 +45,25 @@ class AlertBox extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF003756)),
               ),
+              SizedBox(
+                height: 10,
+              ),
+              MaterialButton(
+                onPressed:(){
+                  Navigator.of(context).pop();
+
+                },
+                color: Color(0xEF5278FF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Ok',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+                minWidth: 120,
+                height: 38,
+              ),
             ],
           ),
         ));

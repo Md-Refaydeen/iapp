@@ -72,7 +72,7 @@ class GeoFencingService {
           '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
       print(officeAddress);
     }).catchError((e) {
-      debugPrint(e);
+      debugPrint(e.toString());
     });
   }
 }

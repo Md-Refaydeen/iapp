@@ -194,7 +194,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                       child: _selectedButton == 1
                                           ? PaginatedDataTable(
                                               rowsPerPage: 10,
-                                              columnSpacing: 15,
+                                              columnSpacing: 16,
                                               columns: [
                                                 DataColumn(label: Text('S.No')),
                                                 DataColumn(label: Text('Name')),
@@ -204,7 +204,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                               source: attendanceDetails)
                                           : _selectedButton == 2
                                               ? PaginatedDataTable(
-                                                  columnSpacing: 15,
+                                                  columnSpacing: 17,
                                                   rowsPerPage: 10,
                                                   columns: [
                                                     DataColumn(
@@ -218,7 +218,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                                   ],
                                                   source: attendanceDetails)
                                               : PaginatedDataTable(
-                                                  columnSpacing: 15,
+                                                  columnSpacing: 17,
                                                   rowsPerPage: 10,
                                                   columns: [
                                                     DataColumn(
