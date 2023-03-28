@@ -31,7 +31,8 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   bool isDataAvailable = true;
 
   Location location = Location();
-  DateTime? _selectedDate, _dates;
+  DateTime _selectedDate=DateTime.now();
+  DateTime? _dates;
   Timer? _debounce;
   var day;
   bool _isVisible = false;
@@ -220,8 +221,10 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         side: BorderSide(color: Colors.white, width: 2.0),
                       ),
                       child: TableCalendar(
+
                         eventLoader: _getEvents,
                         onPageChanged: (d) {
+                          _selectedDate=d;
                           year = d.year;
                           month = d.month;
                           _debounce?.cancel();
@@ -266,7 +269,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                 style: TextStyle(color: Colors.white),
                               )),
                         ),
-                        focusedDay: DateTime.now(),
+                        focusedDay: _selectedDate!,
                         calendarStyle: CalendarStyle(
                           selectedDecoration: BoxDecoration(
                             color: Colors.blue,
@@ -281,6 +284,9 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         headerStyle: HeaderStyle(
                           formatButtonShowsNext: false,
                           titleCentered: true,
+                          titleTextFormatter: (date, _) =>
+                          '${DateFormat.yMMMM().format(date)}', //
+                          formatButtonVisible: false
                         ),
                         onDaySelected: (date, events) {
                           setState(() {

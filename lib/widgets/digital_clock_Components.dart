@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:slide_digital_clock/slide_digital_clock.dart';
 
 class DigitalClockComponent extends StatelessWidget {
-  const DigitalClockComponent({Key? key}) : super(key: key);
+  const DigitalClockComponent({required this.digitalClockColor});
+  final Color digitalClockColor;
+
 
   @override
   Widget build(BuildContext context) {
@@ -12,15 +14,23 @@ class DigitalClockComponent extends StatelessWidget {
       is24HourTimeFormat: true,
       areaDecoration: BoxDecoration(
         color: Colors.transparent,
+
       ),
 
       hourMinuteDigitTextStyle: TextStyle(
-        color: Colors.black87,
+        color: digitalClockColor,
         fontSize: 30,
+
       ),
       secondDigitTextStyle: TextStyle(
-        color: Colors.black87,
+        color: digitalClockColor,
         fontSize: 30,
+      ),
+      hourMinuteDigitDecoration: BoxDecoration(
+        border: null
+      ),
+      secondDigitDecoration: BoxDecoration(
+        border: null
       ),
 
     );

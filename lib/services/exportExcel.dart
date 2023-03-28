@@ -225,7 +225,7 @@ class ExportExcel {
 
     var excel =
         Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
-    Sheet sheetObject = excel[''];
+    Sheet sheetObject = excel['Sheet1'];
     CellStyle headerStyle = CellStyle(
         backgroundColorHex: "#0000FF",
         fontSize: 30,

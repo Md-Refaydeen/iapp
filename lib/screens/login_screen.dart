@@ -215,9 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, AdminAttendanceScreen.routeName);
-                          },
+                          onTap: () {},
                           child: Text(
                             'Terms & Conditions Apply',
                             style: TextStyle(fontSize: 12, color: labels,decoration: TextDecoration.underline),

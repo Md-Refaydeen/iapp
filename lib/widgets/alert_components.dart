@@ -42,9 +42,11 @@ class DialogComponent extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  content,
-                  style: TextStyle(fontSize: 18,color: Color(0xFF003756)),
+                Center(
+                  child: Text(
+                    content,
+                    style: TextStyle(fontSize: 18,color: Color(0xFF003756)),
+                  ),
                 ),
               ],
             ),

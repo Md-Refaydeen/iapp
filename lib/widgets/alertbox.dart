@@ -13,7 +13,7 @@ class AlertBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         child: Container(
-          height: MediaQuery.of(context).size.height / 4.5,
+          height: MediaQuery.of(context).size.height / 4.0,
           width: MediaQuery.of(context).size.width / 1.4,
           decoration: BoxDecoration(),
           child: Column(
@@ -36,7 +36,7 @@ class AlertBox extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: 50,
+                height: 30,
               ),
               Text(
                 'Please click a date to know details',
@@ -46,7 +46,7 @@ class AlertBox extends StatelessWidget {
                     color: Color(0xFF003756)),
               ),
               SizedBox(
-                height: 10,
+                height: 15,
               ),
               MaterialButton(
                 onPressed:(){

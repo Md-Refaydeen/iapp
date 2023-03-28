@@ -32,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Set<Marker> _markers = {};
   bool _showButton = true;
   Timer? _buttonTimer;
-
+  Color color=Colors.black87;
   GoogleMapController? controller;
   String? checkInTime, checkOutTime;
   String? empName, Address;
@@ -424,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          DigitalClockComponent(),
+                          DigitalClockComponent(digitalClockColor: color!),
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 12,
                           ),
@@ -533,7 +533,13 @@ class _HomeScreenState extends State<HomeScreen> {
         });
 
         await showAccessDialogBox('Office');
+        setState(() {
+          color=Colors.red;
+
+        });
         await updateLoginLocation(email);
+
+
       } else {
         await showDeniedDialogBox('Office');
       }
@@ -544,12 +550,18 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           Address = service.officeAddress;
           _isCheckedIn = true;
+
           // prefs.setBool('_isCheckedIn', _isCheckedIn);
         });
         await showAccessDialogBox('Nippon Office');
        // await compute(updateLoginLocation, email);
+        setState(() {
+          color=Colors.red;
+
+        });
 
         updateLoginLocation(email);
+
       } else {
         showDeniedDialogBox('Nippon Office');
       }
@@ -561,10 +573,17 @@ class _HomeScreenState extends State<HomeScreen> {
         _isCheckedIn = true;
         //  prefs.setBool('_isCheckedIn', _isCheckedIn);
         Address = location.homeAddress;
-      });
+
+       });
       showAccessDialogBox('WFH');
+      setState(() {
+        color=Colors.red;
+
+      });
+
       print('wfh:$Address');
       await updateLoginLocation(email);
+
 
     }
   }
@@ -623,6 +642,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _isCheckedIn = false;
       });
       await exitSucesssDialogBox();
+      setState(() {
+        color=Colors.black87;
+
+      });
       updateLogoutLocation(email, Address);
     } else {
       //for user Wfh
@@ -630,8 +653,13 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isCheckedIn = false;
         Address = location.homeAddress;
+
       });
       await exitSucesssDialogBox();
+      setState(() {
+        color=Colors.black87;
+
+      });
       updateLogoutLocation(email, Address);
     }
   }

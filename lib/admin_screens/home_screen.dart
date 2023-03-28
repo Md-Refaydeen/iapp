@@ -26,6 +26,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   int? checkedIn, notCheckedIn, total;
   int? month, year;
   int _selectedButton = 1;
+  Color color=Colors.black87;
 
   var date;
 
@@ -288,7 +289,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          DigitalClockComponent(),
+                          DigitalClockComponent(digitalClockColor:color ),
                         ],
                       ),
                     ],
@@ -319,14 +320,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 25, top: 0.2),
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 25,
-                      ),
-                    ),
+                   SizedBox(
+                     height: 15,
+                   ),
                     Text(
                       'Check In:$checkedIn',
                       style: TextStyle(color: Color(0xff003756)),
@@ -334,6 +330,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   ],
                 ),
               ),
+              Positioned(
+                top:445 ,
+                left: 105,
+                child: Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 25,
+              ),),
               Positioned(
                 top: 320,
                 right: 215,
@@ -388,27 +392,30 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         ),
                       ),
                     ),
-
-
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30, top: 0.5),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        child: Icon(
-                          Icons.close_sharp,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 15,),
                     Text('Not Check In:$notCheckedIn',
-                        style: TextStyle(color: Color(0xff003756)))
+                        style: TextStyle(color: Color(0xff003756))),
+
                   ],
                 ),
               ),
+              Positioned(
+                top: 445,
+                left: 380,
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: CircleAvatar(
+                    radius: 11,
+                    backgroundColor: Colors.red,
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+
               Positioned(
                 top: MediaQuery.of(context).size.height * 0.17,
                 right: MediaQuery.of(context).size.width * 0.1,

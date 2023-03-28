@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:iapp/services/adminApiClass.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:iapp/admin_screens/home_screen.dart';
-import 'package:http/http.dart' as http;
 import '../constants/constants.dart';
 import '../dto/user.dart';
 import '../screens/login_screen.dart';
@@ -105,7 +103,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
       key: _scaffoldKey,
       drawer: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
-          overscroll.disallowGlow();
+          overscroll.disallowIndicator();
           return true;
         },
         child: DrawerComponent(

@@ -28,7 +28,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff;
   String? checkInTime, checkOutTime;
   String? empName, workhrs, remarks, mode, rdate;
-  DateTime? _selectedDate, _dates;
+  DateTime? _selectedDate=DateTime.now(), _dates;
   int? month, year;
   List<User> _attendanceDetailsList = []; // initial empty list
 
@@ -47,6 +47,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
     location.getDate();
     setState(() {
       month = int.parse(location.month);
+      print('initmonth:$month');
       year = int.parse(location.year);
     });
     check();
@@ -183,7 +184,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           margin: const EdgeInsets.all(5.0),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            color: Colors.purple.shade700,
+                                            color: Colors.blue.shade200,
                                             borderRadius:
                                                 BorderRadius.circular(25),
                                           ),
@@ -232,7 +233,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           margin: const EdgeInsets.all(5.0),
                                           alignment: Alignment.center,
                                           decoration: BoxDecoration(
-                                            color: Colors.blue.shade100,
+                                            color: Colors.blue.shade200,
                                             borderRadius:
                                                 BorderRadius.circular(25),
                                           ),
@@ -261,7 +262,21 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                   }
                                 },
                               ),
-                              focusedDay: DateTime.now(),
+                              focusedDay: _selectedDate!,
+                              onPageChanged: (date) async {
+                                _selectedDate=date;
+                                print(date);
+                                month=int.tryParse(DateFormat('MM').format(date));
+                                year=int.tryParse(DateFormat('yyyy').format(date));
+                                print('month:$month,year:$year');
+                                List<User>users=await fetchDetails(emailId, month, year);
+                                _attendanceDetailsList=users;
+                                setState(() {
+                                  dataSource = AttendanceDetailsDataSource(
+                                      _attendanceDetailsList);
+                                });
+                              },
+
                               calendarStyle: CalendarStyle(
                                 selectedDecoration: BoxDecoration(
                                   color: Colors.blue,
@@ -275,8 +290,11 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                 weekendTextStyle: TextStyle(color: Colors.blue),
                               ),
                               headerStyle: HeaderStyle(
-                                formatButtonShowsNext: false,
-                                titleCentered: true,
+                                  formatButtonShowsNext: false,
+                                  titleCentered: true,
+                                  titleTextFormatter: (date, _) =>
+                                  '${DateFormat.yMMMM().format(date)}', //
+                                  formatButtonVisible: false
                               ),
                               rangeSelectionMode: _rangeSelectionMode,
                               rangeStartDay: _rangeStart,
@@ -430,8 +448,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                       if (formattedStartDate != null &&
                                           formattedEndDate != null) {
                                         print('range dates');
-                                        attendanceDetails =
-                                            await AdminApiClass()
+                                        attendanceDetails = await AdminApiClass()
                                                 .individualRangeDate(
                                                     emailId,
                                                     formattedStartDate,
