@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iapp/user_screens/home_screen.dart';
 
 class DialogComponent extends StatelessWidget {
   final String status;
@@ -9,7 +8,7 @@ class DialogComponent extends StatelessWidget {
   final VoidCallback onPress;
 
   const DialogComponent(
-      {required this.status,
+      {super.key, required this.status,
       required this.content,
       required this.image,
       required this.buttonTitle, required this.onPress});
@@ -23,20 +22,20 @@ class DialogComponent extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       backgroundColor: Colors.white,
-      child: Container(
+      child: SizedBox(
         height: MediaQuery.of(context).size.height / 2.0,
         width: MediaQuery.of(context).size.width / 1.6,
         child: Column(
           children: [
             Image.asset(image, height: 185, width: 170),
-            SizedBox(
+            const SizedBox(
               height:25,
             ),
             Text(
               status,
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Color(0xFF003756)),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Color(0xFF003756)),
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Column(
@@ -45,12 +44,12 @@ class DialogComponent extends StatelessWidget {
                 Center(
                   child: Text(
                     content,
-                    style: TextStyle(fontSize: 18,color: Color(0xFF003756)),
+                    style: const TextStyle(fontSize: 18,color: Color(0xFF003756)),
                   ),
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 25,
             ),
             Row(
@@ -58,16 +57,16 @@ class DialogComponent extends StatelessWidget {
               children: [
                 MaterialButton(
                   onPressed:onPress,
-                  color: Color(0xEF5278FF),
+                  color: const Color(0xEF5278FF),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    buttonTitle,
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
                   minWidth: 159,
                   height: 38,
+                  child: Text(
+                    buttonTitle,
+                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
               ],
             ),

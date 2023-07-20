@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iapp/admin_screens/home_screen.dart';
 import '../constants/constants.dart';
 import '../dto/user.dart';
-import '../screens/login_screen.dart';
+import '../user_screens/login_screen.dart';
 import '../services/exportExcel.dart';
 import '../services/getLoc_Time.dart';
 import '../widgets/admindrawer_components.dart';
@@ -19,21 +19,21 @@ class AdminAttendanceScreen extends StatefulWidget {
 }
 
 class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   GlobalKey<ScaffoldState> key = GlobalKey();
 
-  int? current_mon, year, month;
-  static var _searchController = TextEditingController();
+  int? current_Mon, year, month;
+  static final _searchController = TextEditingController();
   String? formattedStartDate, formattedEndDate;
   Future<List<User>>? _user;
-  Location location = Location();
+  GetLoc_Time location = GetLoc_Time();
   String? _searchString, name, empId;
   List<User> _filteredUser = [];
   int currentMonth = DateTime.now().month;
   int currentYear = DateTime.now().year;
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _currentPage = 0;
-  final paginatedKey = new GlobalKey<PaginatedDataTableState>();
+  final paginatedKey = GlobalKey<PaginatedDataTableState>();
   String? _selectedOption;
 
   final dataTableKey = GlobalKey<_AdminAttendanceScreenState>();
@@ -55,15 +55,16 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
 
   @override
   void initState() {
+    super.initState();
     // TODO: implement initState
     _clearSearch();
     location.requestPermission();
     location.getDate();
     year = int.parse(location.year);
     month = int.parse(location.month);
-    _user = AdminApiClass().fetchCount(currentMonth, currentYear);
+    _user = ApiService().fetchCount(currentMonth, currentYear);
 
-    AdminApiClass().fetchCount(month, year).then((value) {
+    ApiService().fetchCount(month, year).then((value) {
       setState(() {
         _filteredUser = value;
       });
@@ -88,7 +89,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   void _clearSearch() {
     _searchController.clear();
     setState(() {
-     AdminApiClass().fetchCount(month, year).then((value) {
+     ApiService().fetchCount(month, year).then((value) {
         setState(() {
           print(value);
           _filteredUser = value;
@@ -135,7 +136,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                   Container(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height / 3,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(colors: [
                         Color(0xB6B091CF),
                         Color(0xFFAD8DCD),
@@ -143,7 +144,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     ),
                     child: Row(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 5,
                         ),
                         Column(
@@ -153,7 +154,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               onPressed: () {
                                 _scaffoldKey.currentState?.openDrawer();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.menu,
                                 size: 23,
                               ),
@@ -165,7 +166,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                       Navigator.pushNamed(
                                           context, AdminHomeScreen.routeName);
                                     },
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.arrow_circle_left_outlined,
                                       color: Color(0xFF3F3D56),
                                       size: 28,
@@ -193,6 +194,12 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                         Container(
                           width: MediaQuery.of(context).size.width / 1.2,
                           height: MediaQuery.of(context).size.height / 14.5,
+                          decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(20.0)),
+                              color: Colors.white),
+                          margin: const EdgeInsets.fromLTRB(20, 40, 20, 0.0),
+                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
                           child: Theme(
                             data: Theme.of(context)
                                 .copyWith(splashColor: Colors.transparent),
@@ -202,15 +209,15 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                               onChanged: (value) {
                                 _filterUsers(value);
                               },
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 15.0, color: Color(0xFFbdc6cf)),
                               decoration: InputDecoration(
                                 prefixIcon: IconButton(
-                                  icon: Icon(Icons.search),
+                                  icon: const Icon(Icons.search),
                                   onPressed: () {},
                                 ),
                                 suffixIcon: IconButton(
-                                  icon: Icon(Icons.clear),
+                                  icon: const Icon(Icons.clear),
                                   onPressed: () {
                                     _clearSearch();
                                   },
@@ -223,22 +230,16 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                   horizontal: 16.0,
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
+                                  borderSide: const BorderSide(color: Colors.white),
                                   borderRadius: BorderRadius.circular(20.7),
                                 ),
                                 enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
+                                  borderSide: const BorderSide(color: Colors.white),
                                   borderRadius: BorderRadius.circular(20.7),
                                 ),
                               ),
                             ),
                           ),
-                          decoration: new BoxDecoration(
-                              borderRadius: new BorderRadius.all(
-                                  new Radius.circular(20.0)),
-                              color: Colors.white),
-                          margin: new EdgeInsets.fromLTRB(20, 40, 20, 0.0),
-                          padding: new EdgeInsets.fromLTRB(8, 8, 8, 8),
                         ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height / 22,
@@ -262,13 +263,13 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                     if (dataSource.rowCount == 0) {
                                       return Container(
                                         alignment: Alignment.center,
-                                        child: Text('No data available.'),
+                                        child: const Text('No data available.'),
                                       );
                                     }
                                     return Container(
                                       width: MediaQuery.of(context).size.width /
                                           1.15,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                           //borderRadius: BorderRadius.circular(15.0),
                                           boxShadow: [
                                             BoxShadow(
@@ -278,7 +279,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                             )
                                           ]),
                                       child: PaginatedDataTable(
-                                        header: Text('Attendance Details'),
+                                        header: const Text('Attendance Details'),
                                         key: paginatedKey,
                                         arrowHeadColor: Colors.black,
                                         columnSpacing: 15,
@@ -296,7 +297,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                         },
                                         actions: [
                                           IconButton(
-                                            icon: Icon(Icons.refresh),
+                                            icon: const Icon(Icons.refresh),
                                             onPressed: () {
                                               print('onPress called');
                                               _clearSearch();
@@ -307,7 +308,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                             },
                                           )
                                         ],
-                                        columns: [
+                                        columns: const [
                                           DataColumn(
                                             label: Text('S.No'),
                                           ),
@@ -332,13 +333,13 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                   } else if (snapshot.hasError) {
                                     return Text(snapshot.error.toString());
                                   }
-                                  return CircularProgressIndicator();
+                                  return const CircularProgressIndicator();
                                 },
                               ),
                               Container(
                                 child: MaterialButton(
                                   onPressed: () async {
-                                    var attendanceDetailsList;
+                                    List attendanceDetailsList;
                                     var attendanceCount;
                                     //fordate range
                                     print(formattedEndDate);
@@ -346,11 +347,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                         formattedEndDate != null) {
                                       print('range api');
                                       //calling api method of data
-                                      attendanceCount=await AdminApiClass()
+                                      attendanceCount=await ApiService()
                                           .exportByRangeCount(formattedStartDate, formattedEndDate);
 
                                       attendanceDetailsList =
-                                          await AdminApiClass().exportByRange(
+                                          await ApiService().exportByRange(
                                               formattedStartDate,
                                               formattedEndDate);
 
@@ -360,9 +361,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                     } else {
                                       //calling api methods
                                       print('month wise');
-                                      attendanceCount=AdminApiClass().fetchCount(currentMonth, currentYear);
+                                      attendanceCount=ApiService().fetchCount(currentMonth, currentYear);
                                       attendanceDetailsList =
-                                          await AdminApiClass().exportByMonth(
+                                          await ApiService().exportByMonth(
                                               currentMonth, currentYear);
                                       //exporting datas to excel
                                       ExportExcel().exportOverMonth(
@@ -377,11 +378,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                     width: MediaQuery.of(context).size.width /
                                         1.16,
                                     margin:
-                                        EdgeInsets.only(top: 0.1, bottom: 8),
+                                        const EdgeInsets.only(top: 0.1, bottom: 8),
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: Colors.grey.shade200),
-                                      borderRadius: BorderRadius.only(
+                                      borderRadius: const BorderRadius.only(
                                         topLeft: Radius.circular(6),
                                         topRight: Radius.circular(6),
                                         bottomRight: Radius.circular(25),
@@ -389,7 +390,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                                       ),
                                       color: Colors.white,
                                     ),
-                                    child: Center(
+                                    child: const Center(
                                         child: Text(
                                       'Export',
                                       style: TextStyle(
@@ -417,7 +418,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     onPressed: () {
                       showOptions(context);
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.filter_list_off_rounded,
                       color: Color(0xFF3F3D56),
                     ),
@@ -431,7 +432,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                   width: 282,
                   decoration: BoxDecoration(
                       color: BGcolor,
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
                           blurRadius: 15.0,
@@ -443,9 +444,9 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        color: Color(0xff3F3D56),
+                        color: const Color(0xff3F3D56),
                         iconSize: 25,
-                        icon: Icon(Icons.chevron_left),
+                        icon: const Icon(Icons.chevron_left),
                         onPressed: () async {
                           setState(() {
                             currentMonth--;
@@ -455,7 +456,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                             }
                           });
                           List<User> userList =
-                              await AdminApiClass().fetchCount(currentMonth, currentYear);
+                              await ApiService().fetchCount(currentMonth, currentYear);
                           setState(() {
                             _filteredUser = userList; // update the data source
                             _userDataSource = _UserDataSource(
@@ -471,23 +472,23 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                           print(currentYear);
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 50,
                       ),
                       Text(
                         "${months[currentMonth - 1]} - $currentYear",
                         style:
-                            TextStyle(fontSize: 17, color: Color(0xFF003756)),
+                            const TextStyle(fontSize: 17, color: Color(0xFF003756)),
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width / 12,
                       ),
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.chevron_right,
                         ),
                         iconSize: 25,
-                        color: Color(0xff3F3D56),
+                        color: const Color(0xff3F3D56),
                         onPressed: () async {
                           setState(() {
                             currentMonth++;
@@ -497,7 +498,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
                             }
                           });
                           List<User> userList =
-                              await AdminApiClass().fetchCount(currentMonth, currentYear);
+                              await ApiService().fetchCount(currentMonth, currentYear);
                           setState(() {
                             _filteredUser = userList; // update the data source
                             _userDataSource = _UserDataSource(
@@ -525,11 +526,12 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   void showOptions(BuildContext context) async {
     final result = await showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(1000, 250, 40, 0),
+      position: const RelativeRect.fromLTRB(1000, 250, 40, 0),
       items: [
         PopupMenuItem(
+          value: "Select Date",
           child: Row(
-            children: [
+            children: const [
               Icon(
                 Icons.calendar_month,
                 color: Color(0xFF3F3F3F),
@@ -543,11 +545,11 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               ),
             ],
           ),
-          value: "Select Date",
         ),
         PopupMenuItem(
+          value: "Over All",
           child: Row(
-            children: [
+            children: const [
               Icon(
                 Icons.filter_list_off,
                 color: Color(0xFF3F3F3F),
@@ -558,7 +560,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               Text("Over All", style: TextStyle(color: Color(0xFf747474))),
             ],
           ),
-          value: "Over All",
         ),
       ],
     );
@@ -574,7 +575,6 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
   }
 
   getDateRange(BuildContext context) {
-    _UserDataSource _userDataSource;
     return showDateRangePicker(
       context: context,
       firstDate: DateTime.utc(2018, 10, 16),
@@ -588,7 +588,7 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
               child: Container(
                 height: MediaQuery.of(context).size.height / 1.45,
                 width: MediaQuery.of(context).size.width / 1.2,
-                decoration: BoxDecoration(boxShadow: [
+                decoration: BoxDecoration(boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 15.0,
@@ -610,24 +610,17 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
         DateTime endDate = dateRange.end;
         formattedStartDate = DateFormat('yyyy-MM-dd').format(startDate);
         formattedEndDate = DateFormat('yyyy-MM-dd').format(endDate);
-//calling count api for range
-        AdminApiClass()
+        //calling count api for range
+        ApiService()
             .exportByRangeCount(formattedStartDate, formattedEndDate)
             .then((response) {
-          if (response != null && response.isNotEmpty) {
+          if (response.isNotEmpty) {
             List<Map<String, dynamic>> data =
                 List<Map<String, dynamic>>.from(response);
             List<User> userList =
                 data.map((map) => User.fromJson(map)).toList();
             _filteredUser = userList; // update the data source
             setState(() {
-              _userDataSource = _UserDataSource(
-                _filteredUser,
-                _rowsPerPage,
-                _currentPage,
-                name,
-                context,
-              );
             });
           }
         });
@@ -639,8 +632,8 @@ class _AdminAttendanceScreenState extends State<AdminAttendanceScreen> {
 class _UserDataSource extends DataTableSource {
   BuildContext context;
   final List<User> _users;
-  int _rowsPerPage;
-  int _currentPage;
+  final int _rowsPerPage;
+  final int _currentPage;
   var name;
   String _searchQuery = '';
 
@@ -671,11 +664,11 @@ class _UserDataSource extends DataTableSource {
     return DataRow(
       cells: [
         DataCell(Text('${pageOffset + localIndex + 1}',
-            style: TextStyle(color: Color(0xFF003756)))),
+            style: const TextStyle(color: Color(0xFF003756)))),
         DataCell(
           InkWell(
             child: Text(user.name ?? '----',
-                style: TextStyle(color: Color(0xFF003756))),
+                style: const TextStyle(color: Color(0xFF003756))),
             onTap: () {
               name = user.name;
               Navigator.pushNamed(context, UserAttendanceScreen.routeName,
@@ -690,7 +683,7 @@ class _UserDataSource extends DataTableSource {
               width: 22,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   colors: [
                     Color(0xFF5278FF),
                     Color(0xFF6C84D9),
@@ -700,7 +693,7 @@ class _UserDataSource extends DataTableSource {
               child: Center(
                 child: Text(
                   user.Present == null ? '----' : '${user.Present}',
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
@@ -713,7 +706,7 @@ class _UserDataSource extends DataTableSource {
               width: 22,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   colors: [
                     Color(0xFFCE3636),
                     Color(0xFFFF0000),
@@ -723,7 +716,7 @@ class _UserDataSource extends DataTableSource {
               child: Center(
                 child: Text(
                   user.Absent == null ? '----' : '${user.Absent}',
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
@@ -744,9 +737,6 @@ class _UserDataSource extends DataTableSource {
           user.Absent != null &&
           user.name!.toLowerCase().contains(_searchQuery))
       .length;
-
-  // @override
-  // int get rowCount => _users.where((user) => user.name!.toLowerCase().contains(_searchQuery)).length;
 
   @override
   int get selectedRowCount => 0;

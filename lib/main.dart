@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iapp/routes_folder/routes.dart';
-import 'package:iapp/screens/splash_screen.dart';
+import 'package:iapp/user_screens/splash_screen.dart';
 import 'package:iapp/user_screens/home_screen.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 
@@ -18,14 +18,14 @@ class MyApp extends StatelessWidget {
           minWidth: 480,
           defaultScale: true,
           breakpoints: [
-            ResponsiveBreakpoint.autoScale(480, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(550, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(600, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(650, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(720, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(800, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(1000, name: MOBILE),
-            ResponsiveBreakpoint.autoScale(1100, name: DESKTOP),
+            const ResponsiveBreakpoint.autoScale(480, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(550, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(600, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(650, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(720, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(800, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(1000, name: MOBILE),
+            const ResponsiveBreakpoint.autoScale(1100, name: DESKTOP),
           ]),
       theme: ThemeData(
         primarySwatch: Colors.blue,

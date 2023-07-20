@@ -1,23 +1,25 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:geofence_service/geofence_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iapp/user_screens/attendance_screen.dart';
-import 'package:iapp/services/geofence.dart';
+import 'package:iapp/services/track_location.dart';
 import 'package:iapp/services/getLoc_Time.dart';
-import 'package:iapp/screens/login_screen.dart';
+import 'package:iapp/user_screens/login_screen.dart';
 import 'package:intl/intl.dart';
 import '../dto/user.dart';
 import '../widgets/alert_components.dart';
 import '../constants/constants.dart';
 import 'package:flutter_svg/svg.dart';
 import '../widgets/digital_clock_Components.dart';
+import '../widgets/googleMap_Widget.dart';
 import '../widgets/list_components.dart';
-
+import '../widgets/welcome_widget.dart';
+import 'package:iapp/datas/geofences.dart';
 class HomeScreen extends StatefulWidget {
   static String routeName = 'HomeScreen';
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,18 +29,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  GeoFencingService service = GeoFencingService();
+
+  final _activityStreamController = StreamController<Activity>();
+  final _geofenceStreamController = StreamController<Geofence>();
+  int count = 0;
+  bool _isInExitState = false;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  TrackLocation service = TrackLocation();
   final Set<Marker> _markers = {};
   bool _showButton = true;
-  Timer? _buttonTimer;
-  Color color=Colors.black87;
+  Color color = Colors.black87;
   GoogleMapController? controller;
   String? checkInTime, checkOutTime;
   String? empName, Address;
   bool isLoading = false;
   Position? position;
-  Location location = Location();
+  GetLoc_Time location = GetLoc_Time();
   Timer? _timer;
 
   User user = User();
@@ -48,53 +55,82 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var name, mode;
   final dateFormat = DateFormat('yyyy-MM-dd');
+  final GeofenceService _geofenceService = GeofenceService.instance.setup(
+      interval: 10000,
+      accuracy: 100,
+      loiteringDelayMs: 60000,
+      statusChangeDelayMs: 1000,
+      useActivityRecognition: true,
+      allowMockLocations: false,
+      printDevLog: true,
+      geofenceRadiusSortType: GeofenceRadiusSortType.ASC);
+
   @override
   void dispose() {
     _timer?.cancel();
+    _activityStreamController.close();
+    _geofenceStreamController.close();
+
     super.dispose();
   }
+
   void _hideButton() {
     setState(() {
       _showButton = false;
     });
-    Timer(Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 2), () {
       setState(() {
         _showButton = true;
       });
     });
-
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _geofenceService
+          .addGeofenceStatusChangeListener(_onGeofenceStatusChanged);
+      _geofenceService.addLocationChangeListener(_onLocationChanged);
+      _geofenceService.addLocationServicesStatusChangeListener(
+          _onLocationServicesStatusChanged);
+      _geofenceService.addActivityChangeListener(_onActivityChanged);
+      _geofenceService.addStreamErrorListener(_onError);
+      _geofenceService.start(geofenceList).catchError(_onError);
+    });
+
     location.getDate();
-    check();
-    // // _timer = Timer.periodic(Duration(seconds: 60), (timer) {
-    //   if (DateTime.now().hour >= 11.22) {
-    //     checkOut();
-    //   }
+    checkingDatas();
   }
 
-  Future<void> check() async {
+  Future<void> _saveBreakCount(int count) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('break_count', count);
+  }
+
+  Future<void> checkingDatas() async {
     print('check');
 
     final prefs = await SharedPreferences.getInstance();
     _isCheckedIn = prefs.getBool('_isCheckedIn') ?? false;
+    final previousCount = prefs.getInt('break_count') ?? 0;
+    print('previousCount:$previousCount');
+
     Future.delayed(const Duration(milliseconds: 50), () {
-      setState(() async {
+      setState(() {
         fetchData(email, location.date);
-        await service.startGeofencing(mode);
+        count = previousCount;
+        print('old Count:$count');
       });
       var greets = location.greeting();
       print(greets);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           greets,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Color(0xFFAD8DCD),
-        duration: Duration(seconds: 5),
+        backgroundColor: const Color(0xFFAD8DCD),
+        duration: const Duration(seconds: 5),
       ));
     });
   }
@@ -113,181 +149,136 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    return Scaffold(
-      drawer: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowGlow();
-          return true;
-        },
-        child: Drawer(
-          backgroundColor: Colors.purple.shade50,
-          width: MediaQuery.of(context).size.width * 0.7,
-          child: ListView(
-            padding: EdgeInsets.only(top: 65.0),
-            children: <Widget>[
-              IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(Icons.arrow_back_ios),
-                  alignment: Alignment.topRight),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 15,
-                    width: MediaQuery.of(context).size.width / 5,
-                    child: CircleAvatar(
-                      backgroundImage: AssetImage(
-                        'assets/images/user.png',
-                      ),
-                      radius: 30,
-                    ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 7,
-                    width: MediaQuery.of(context).size.width / 25,
-                  ),
-                  Text(
-                    name,
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ],
-              ),
-              ListComponents(
-                title: 'Home',
-                iconData: Icons.home_filled,
-                onPress: () {
-                  Navigator.pushNamed(context, HomeScreen.routeName,
-                      arguments: {'email': email, 'empName': name, 'mode': mode});
-                },
-              ),
-              ListComponents(
-                title: 'Attendance',
-                iconData: Icons.calendar_today_outlined,
-                onPress: () {
-                  Navigator.pushNamed(context, AttendanceScreen.routeName,
-                      arguments: {
-                        'email': email,
-                        'name': name,
-                        'mode': mode,
-                      });
-                },
-              ),
-              ListComponents(
-                title: 'Logout',
-                iconData: Icons.power_settings_new,
-                onPress: () {
-                  Navigator.pushNamed(context, LoginScreen.routeName);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Logged out Successfully".toString())));
-                },
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height / 4.0,
-              ),
-              Container(
-                margin:
-                    EdgeInsets.only(top: kDefaultPadding, right: kDefaultPadding),
-                width: MediaQuery.of(context).size.width / 4,
-                height: MediaQuery.of(context).size.height / 10,
-                child: Image.asset(
-                  'assets/images/Ideassion.png',
-                ),
-              ),
-            ],
-          ),
-        ),
+    return WillStartForegroundTask(
+      onWillStart: () async {
+        // You can add a foreground task start condition.
+        return _geofenceService.isRunningService;
+      },
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'geofence_service_notification_channel',
+        channelName: 'Geofence Service Notification',
+        channelDescription:
+            'This notification appears when the geofence service is running in the background.',
+        channelImportance: NotificationChannelImportance.LOW,
+        priority: NotificationPriority.LOW,
+        isSticky: false,
       ),
-      key: _scaffoldKey,
-      body: Stack(children: <Widget>[
-        SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(13.0567141, 80.2571275),
-              zoom: 20.0,
-              tilt: 0,
-              bearing: 0,
-            ),
-            zoomControlsEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            compassEnabled: false,
-            onMapCreated: (GoogleMapController controller) {
-              controller = controller;
-            },
-            markers: _markers,
-            circles: Set.of([
-              Circle(
-                circleId: CircleId('Attendance Boundary'),
-                center: LatLng(13.0567141, 80.2571275),
-                radius: 30.0,
-                strokeColor: Colors.red.shade100.withOpacity(0.50),
-                fillColor: Colors.red.withOpacity(0.30),
-              )
-            ]),
-          ),
-        ),
-        Positioned(
-          top: 39.0,
-          left: 0.0,
-          right: 0.0,
-          child: Container(
-            //color: Colors.redAccent,
-            height: 56,
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(horizontal: 20.0),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(1.0),
-                  border: Border.all(color: boxColor, width: 1.0),
-                  color: BGcolor),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.menu,
-                      color: iconColor,
-                    ),
+      iosNotificationOptions: const IOSNotificationOptions(),
+      foregroundTaskOptions: const ForegroundTaskOptions(),
+      notificationTitle: 'iapp is running',
+      notificationText: 'Tap to return to the app',
+      child: Scaffold(
+        drawer: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return true;
+          },
+          child: Drawer(
+            backgroundColor: Colors.purple.shade50,
+            width: MediaQuery.of(context).size.width * 0.7,
+            child: ListView(
+              padding: const EdgeInsets.only(top: 65.0),
+              children: <Widget>[
+                IconButton(
                     onPressed: () {
-                      _scaffoldKey.currentState?.openDrawer();
+                      Navigator.pop(context);
                     },
-                  ),
-                  Expanded(
-                      child: Container(
-                    alignment: Alignment.center,
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      'Welcome',
-                      style: TextStyle(
-                        fontSize: 26,
+                    icon: const Icon(Icons.arrow_back_ios),
+                    alignment: Alignment.topRight),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height / 15,
+                      width: MediaQuery.of(context).size.width / 5,
+                      child: const CircleAvatar(
+                        backgroundImage: AssetImage(
+                          'assets/images/user.png',
+                        ),
+                        radius: 30,
                       ),
                     ),
-                  )),
-                  IconButton(
-                    icon: Icon(
-                      Icons.account_circle_rounded,
-                      color: iconColor,
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height / 7,
+                      width: MediaQuery.of(context).size.width / 25,
                     ),
-                    onPressed: () {
-                      //print("your menu action here");
-                    },
+                    Text(
+                      name,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+                ListComponents(
+                  title: 'Home',
+                  iconData: Icons.home_filled,
+                  onPress: () {
+                    Navigator.pushNamed(context, HomeScreen.routeName,
+                        arguments: {
+                          'email': email,
+                          'empName': name,
+                          'mode': mode
+                        });
+                  },
+                ),
+                ListComponents(
+                  title: 'Attendance',
+                  iconData: Icons.calendar_today_outlined,
+                  onPress: () {
+                    Navigator.pushNamed(context, AttendanceScreen.routeName,
+                        arguments: {
+                          'email': email,
+                          'name': name,
+                          'mode': mode,
+                        });
+                  },
+                ),
+                ListComponents(
+                  title: 'Logout',
+                  iconData: Icons.power_settings_new,
+                  onPress: () {
+                    Navigator.pushNamed(context, LoginScreen.routeName);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("Logged out Successfully".toString())));
+                  },
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 4.0,
+                ),
+                Container(
+                  margin: const EdgeInsets.only(
+                      top: kDefaultPadding, right: kDefaultPadding),
+                  width: MediaQuery.of(context).size.width / 4,
+                  height: MediaQuery.of(context).size.height / 10,
+                  child: Image.asset(
+                    'assets/images/Ideassion.png',
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-        bottom()
-      ]),
+        key: _scaffoldKey,
+        body: Stack(children: <Widget>[
+          googleMap_Widget(markers: _markers),
+          Positioned(
+            top: 39.0,
+            left: 0.0,
+            right: 0.0,
+            child: Container(
+              height: 56,
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Welcome_widget(scaffoldKey: _scaffoldKey),
+            ),
+          ),
+          scrollContainer()
+        ]),
+      ),
     );
   }
 
-  DraggableScrollableSheet bottom() {
+  DraggableScrollableSheet scrollContainer() {
     return DraggableScrollableSheet(
       expand: true,
       initialChildSize: 0.3,
@@ -301,28 +292,29 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           clipBehavior: Clip.none,
-          physics: ClampingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           controller: scrollController,
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                  padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
                   width: MediaQuery.of(context).size.width / 1.2,
                   height: MediaQuery.of(context).size.height / 2.5,
                   decoration: BoxDecoration(
-                      color: BGcolor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(kDefaultPadding),
-                        topRight: Radius.circular(kDefaultPadding),
-                      ),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                            blurRadius: 20,
-                            offset: Offset.zero,
-                            color: Colors.grey.withOpacity(0.5))
-                      ]),
+                    color: BGcolor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(kDefaultPadding),
+                      topRight: Radius.circular(kDefaultPadding),
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                          blurRadius: 20,
+                          offset: Offset.zero,
+                          color: Colors.grey.withOpacity(0.5))
+                    ],
+                  ),
                   child: Column(
                     children: [
                       sizedBox,
@@ -330,17 +322,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 20,
                             height: 15.0,
                           ),
-                          CircleAvatar(
+                          const CircleAvatar(
                             backgroundImage: AssetImage(
                               'assets/images/user.png',
                             ),
                             radius: 25.0,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 15,
                           ),
                           Column(
@@ -349,55 +341,51 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Text(
                                   name,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF003756)),
                                 ),
-
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    Text('Trainee',
+                                    const Text('Trainee',
                                         style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w400,
                                             color: Color(0xff003756))),
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 15,
                                     ),
                                     TextButton(
                                         onPressed: () {},
-                                        style: ButtonStyle(),
+                                        style: const ButtonStyle(),
                                         child: Text(mode.toString())),
                                   ],
                                 ),
                               ]),
-
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 8,
                           ),
                           SvgPicture.asset(
                             height: 57,
-                            width:46,
+                            width: 46,
                             'assets/images/logo.svg',
                             alignment: Alignment.topRight,
                           ),
-
                         ],
                       ),
-
                       //sizedBox,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 20,
                           ),
                           Text(
                             location.cdate3.toString(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF003756),
@@ -408,12 +396,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: kDefaultPadding * 2,
                             width: 20,
                           ),
                           Text(location.day.toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF003756),
@@ -424,64 +412,60 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          DigitalClockComponent(digitalClockColor: color!),
+                          DigitalClockComponent(digitalClockColor: color),
                           SizedBox(
                             width: MediaQuery.of(context).size.width / 12,
                           ),
-                          _showButton ?Container(
-                            width: 150,
-                            height: 38,
-                            alignment: Alignment.center,
-                            child: MaterialButton(
-                              height: 159,
-                              minWidth: 38,
-                              color: btnColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Text(
-                                _isCheckedIn ? 'Check Out' : 'Check In',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 17),
-                              ),
-                              onPressed: () async {
-                                if (_isCheckedIn) {
-                                  checkOut();
-                                } else {
-                                  checkIn();
-                                }
-                               _hideButton();
-                              }),
-                          ):SizedBox()
+                          _showButton
+                              ? Container(
+                                  width: 150,
+                                  height: 38,
+                                  alignment: Alignment.center,
+                                  child: MaterialButton(
+                                      height: 159,
+                                      minWidth: 38,
+                                      color: btnColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Text(
+                                        _isCheckedIn ? 'Check Out' : 'Check In',
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 17),
+                                      ),
+                                      onPressed: () async {
+                                        if (_isCheckedIn) {
+                                          checkOut();
+                                        } else {
+                                          checkIn();
+                                        }
+                                        _hideButton();
+                                      }),
+                                )
+                              : const SizedBox()
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: kDefaultPadding * 4,
                             width: 20,
                           ),
-                          Text(
+                          const Text(
                             'Check In:',
                             style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w400,
                                 color: Color(0XFF003756)),
                           ),
-                          Column(
-                            children: [
-                              Text(
-                                checkInTime != null
-                                    ? '$checkInTime'
-                                    : '--- ---',
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0XFF003756)),
-                              )
-                            ],
+                          Text(
+                            checkInTime != null ? '$checkInTime' : '--- ---',
+                            style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0XFF003756)),
                           ),
                         ],
                       ),
@@ -489,32 +473,45 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: kDefaultPadding,
                             width: 20,
                           ),
-                          Text(
+                          const Text(
                             'Check Out:',
                             style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w400,
                                 color: Color(0XFF003756)),
                           ),
-                          Column(
-                            children: [
-                              Text(
-                                checkOutTime != null
-                                    ? '$checkOutTime'
-                                    : '--- ---',
-                                style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0XFF003756)),
-                              )
-                            ],
+                          Text(
+                            checkOutTime != null ? '$checkOutTime' : '--- ---',
+                            style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0XFF003756)),
                           ),
                         ],
                       ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Text(
+                            'Breaks:$count',
+                            style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0XFF003756)),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),
@@ -534,57 +531,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
         await showAccessDialogBox('Office');
         setState(() {
-          color=Colors.red;
-
+          color = Colors.red;
         });
+
         await updateLoginLocation(email);
-
-
       } else {
         await showDeniedDialogBox('Office');
       }
     } else if (mode == 'Nippon' && checkMode == true) {
       if (service.officeAddress != null) {
-        //final prefs = await SharedPreferences.getInstance();
-
         setState(() {
           Address = service.officeAddress;
           _isCheckedIn = true;
 
-          // prefs.setBool('_isCheckedIn', _isCheckedIn);
         });
         await showAccessDialogBox('Nippon Office');
-       // await compute(updateLoginLocation, email);
-        setState(() {
-          color=Colors.red;
+        setState(()  {
+          color = Colors.red;
+
 
         });
 
         updateLoginLocation(email);
-
       } else {
         showDeniedDialogBox('Nippon Office');
       }
     } else {
       //if the user in home this will work
       await location.getAddress();
-      // final prefs = await SharedPreferences.getInstance();
-       setState(() {
+      setState(() {
         _isCheckedIn = true;
-        //  prefs.setBool('_isCheckedIn', _isCheckedIn);
         Address = location.homeAddress;
-
-       });
+      });
       showAccessDialogBox('WFH');
       setState(() {
-        color=Colors.red;
-
+        color = Colors.red;
       });
 
       print('wfh:$Address');
       await updateLoginLocation(email);
-
-
     }
   }
 
@@ -592,6 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool('_isCheckedIn', _isCheckedIn);
 
+    // ignore: use_build_context_synchronously
     showDialog(
         context: context,
         builder: (_) => DialogComponent(
@@ -622,6 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> exitSucesssDialogBox() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('_isCheckedIn');
+    // ignore: use_build_context_synchronously
     showDialog(
         context: context,
         builder: (_) => DialogComponent(
@@ -643,22 +630,22 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       await exitSucesssDialogBox();
       setState(() {
-        color=Colors.black87;
-
+        color = Colors.black87;
       });
       updateLogoutLocation(email, Address);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('break_count');
+
     } else {
       //for user Wfh
       await location.getAddress();
       setState(() {
         _isCheckedIn = false;
         Address = location.homeAddress;
-
       });
       await exitSucesssDialogBox();
       setState(() {
-        color=Colors.black87;
-
+        color = Colors.black87;
       });
       updateLogoutLocation(email, Address);
     }
@@ -672,7 +659,7 @@ class _HomeScreenState extends State<HomeScreen> {
     };
     var jsonResponse;
     String apiEndpoint =
-        'http://ems-ma.ideassionlive.in/api/UserActivity/postUserActivityDetails';
+        '$appUrl/UserActivity/postUserActivityDetails';
     var body = json.encode(data);
     final Uri url = Uri.parse(apiEndpoint);
     var response = await http.post(
@@ -696,10 +683,11 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
   void fetchData(var email, var date) async {
     try {
       String apiEndpoint =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndDate?email=$email&date=$date';
+          '$appUrl/UserActivity/findByEmailAndDate?email=$email&date=$date';
       final Uri url = Uri.parse(apiEndpoint);
       var jsonResponse;
       final response = await http.get(url);
@@ -709,7 +697,6 @@ class _HomeScreenState extends State<HomeScreen> {
         checkInTime = jsonResponse["loginTime"];
         print(checkInTime);
         checkOutTime = jsonResponse["logoutTime"];
-        // var UserDetails = jsonResponse['userId'];
         User user = User.fromJson(jsonResponse);
         setState(() {
           checkInTime = user.loginTime;
@@ -723,6 +710,7 @@ class _HomeScreenState extends State<HomeScreen> {
       rethrow;
     }
   }
+
   Future<void> updateLogoutLocation(var email, String? Address) async {
     var headers = {
       'accept': '*/*',
@@ -733,10 +721,10 @@ class _HomeScreenState extends State<HomeScreen> {
       "email": email,
       "logoutLocation": Address.toString(),
       "date": location.date.toString(),
-      "workModeCheckOut":mode.toString(),
+      "workModeCheckOut": mode.toString(),
     };
     var response = await http.put(
-        Uri.parse('http://ems-ma.ideassionlive.in/api/UserActivity/logout'),
+        Uri.parse('$appUrl/UserActivity/logout'),
         headers: headers,
         body: jsonEncode(data));
     if (response.statusCode == 200) {
@@ -758,4 +746,68 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  Future<void> _onGeofenceStatusChanged(
+      Geofence geofence,
+      GeofenceRadius geofenceRadius,
+      GeofenceStatus geofenceStatus,
+      Location location,
+      ) async {
+    print('geofence: ${geofence.toJson()}');
+    print('geofenceRadius: ${geofenceRadius.toJson()}');
+    print('geofenceStatus: ${geofenceStatus.toString()}');
+
+    if (geofenceStatus == GeofenceStatus.ENTER) {
+      print('enter state in georadius:${location.longitude},${location.latitude}');
+      service.markAttendance(
+        latitude: location.latitude,
+        longitude: location.longitude,
+      );
+      if (_isInExitState) {
+        setState(() {
+          count = count + 1;
+        });
+        await _saveBreakCount(count);
+        _isInExitState = false; // Reset the flag as the user is back in the "ENTER" state.
+      }
+    } else if (geofenceStatus == GeofenceStatus.DWELL) {
+      print('dwell state');
+    } else {
+      print('exit state');
+      _isInExitState = true; // Set the flag as the user is in the "EXIT" state.
+    }
+
+    _geofenceStreamController.sink.add(geofence);
+  }
+
+  // This function is to be called when the activity has changed.
+  void _onActivityChanged(Activity prevActivity, Activity currActivity) {
+    print('prevActivity: ${prevActivity.toJson()}');
+    print('currActivity: ${currActivity.toJson()}');
+    _activityStreamController.sink.add(currActivity);
+  }
+
+  // This function is to be called when the location has changed.
+  void _onLocationChanged(Location location) {
+    print('location: ${location.toJson()}');
+  }
+
+  // This function is to be called when a location services status change occurs
+  // since the service was started.
+  void _onLocationServicesStatusChanged(bool status) {
+    print('isLocationServicesEnabled: $status');
+  }
+
+  // This function is used to handle errors that occur in the service.
+  void _onError(error) {
+    final errorCode = getErrorCodesFromError(error);
+    if (errorCode == null) {
+      print('Undefined error: $error');
+      return;
+    }
+
+    print('ErrorCode: $errorCode');
+  }
 }
+
+

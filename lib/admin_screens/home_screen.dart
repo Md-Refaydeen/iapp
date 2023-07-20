@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
-import 'package:iapp/screens/login_screen.dart';
+import 'package:iapp/services/adminApiClass.dart';
+import 'package:iapp/user_screens/login_screen.dart';
 import '../widgets/admindrawer_components.dart';
 import 'package:iapp/admin_screens/attendance_screen.dart';
 import 'package:iapp/constants/constants.dart';
@@ -20,8 +21,8 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  Location location = Location();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  GetLoc_Time location = GetLoc_Time();
   Future<List<User>>? _user;
   int? checkedIn, notCheckedIn, total;
   int? month, year;
@@ -38,7 +39,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     date = location.date;
     print(date);
     usersCount(date);
-    _user = fetchUsers(date, presentStatus);
+    _user =ApiService().fetchUsers(date, presentStatus);
   }
 
   Future<void> check() async {
@@ -48,10 +49,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           greets,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
-        backgroundColor: Color(0xFFAD8DCD),
-        duration: Duration(seconds: 5),
+        backgroundColor: const Color(0xFFAD8DCD),
+        duration: const Duration(seconds: 5),
       ));
     });
   }
@@ -95,7 +96,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 children: [
                   Container(
                       height: MediaQuery.of(context).size.height / 3,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(colors: [
                           Color(0xB6B091CF),
                           Color(0xFFAD8DCD),
@@ -109,7 +110,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                SizedBox(
+                                const SizedBox(
                                   height: kDefaultPadding * 2,
                                   width: kDefaultPadding,
                                 ),
@@ -117,7 +118,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                   onPressed: () {
                                     _scaffoldKey.currentState?.openDrawer();
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.menu,
                                     color: Color(0xFF3F3D56),
                                     size: 23,
@@ -136,7 +137,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                                   "Logged out Successfully"
                                                       .toString())));
                                     },
-                                    icon: Icon(Icons.power_settings_new,
+                                    icon: const Icon(Icons.power_settings_new,
                                         color: Color(0xFF3F3D56)))
                               ],
                             ),
@@ -172,18 +173,18 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                   if (attendanceDetails.rowCount == 0) {
                                     return Container(
                                       alignment: Alignment.center,
-                                      child: Text('No data available.'),
+                                      child: const Text('No data available.'),
                                     );
                                   }
 
                                   return Container(
                                       width: MediaQuery.of(context).size.width /
                                           1.15,
-                                      constraints: BoxConstraints(
+                                      constraints: const BoxConstraints(
                                         minHeight: 200, // Set a minim
                                         // um height
                                       ),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                           //borderRadius: BorderRadius.circular(15.0),
                                           boxShadow: [
                                             BoxShadow(
@@ -196,7 +197,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                           ? PaginatedDataTable(
                                               rowsPerPage: 10,
                                               columnSpacing: 16,
-                                              columns: [
+                                              columns: const [
                                                 DataColumn(label: Text('S.No')),
                                                 DataColumn(label: Text('Name')),
                                                 DataColumn(label: Text('Mode')),
@@ -207,7 +208,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                               ? PaginatedDataTable(
                                                   columnSpacing: 17,
                                                   rowsPerPage: 10,
-                                                  columns: [
+                                                  columns: const[
                                                     DataColumn(
                                                         label: Text('S.No')),
                                                     DataColumn(
@@ -221,7 +222,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                               : PaginatedDataTable(
                                                   columnSpacing: 17,
                                                   rowsPerPage: 10,
-                                                  columns: [
+                                                  columns:const[
                                                     DataColumn(
                                                         label: Text('S.No')),
                                                     DataColumn(
@@ -235,7 +236,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                                 } else if (snapshot.hasError) {
                                   return Text(snapshot.error.toString());
                                 }
-                                return CircularProgressIndicator();
+                                return const CircularProgressIndicator();
                               },
                             );
                           })),
@@ -252,7 +253,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 child: Container(
                   height: MediaQuery.of(context).size.height / 2.3,
                   width: MediaQuery.of(context).size.width / 2,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(kDefaultPadding * 1.5),
                           bottomRight: Radius.circular(kDefaultPadding * 1.5),
@@ -264,24 +265,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             height: kDefaultPadding * 4,
                             width: 20,
                           ),
                           Text(
                             '${location.cdate3}',
-                            style: TextStyle(fontSize: 17),
+                            style: const TextStyle(fontSize: 17),
                           ),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 20,
                           ),
                           Text(location.day.toString(),
-                              style: TextStyle(fontSize: 15)),
+                              style: const TextStyle(fontSize: 15)),
                         ],
                       ),
                       sizedBox,
@@ -305,32 +306,32 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       height: 60.0,
                       width: 60.0,
                       decoration: BoxDecoration(
-                        color: Color(0xcf7C4CAC),
+                        color: const Color(0xcf7C4CAC),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: IconButton(
                         onPressed: () {
                           setState(() => _selectedButton = 3);
-                          _user = fetchUsers(date, presentStatus);
+                          _user = ApiService().fetchUsers(date, presentStatus);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.person,
                           color: Colors.white,
                           size: 42,
                         ),
                       ),
                     ),
-                   SizedBox(
+                   const SizedBox(
                      height: 15,
                    ),
                     Text(
                       'Check In:$checkedIn',
-                      style: TextStyle(color: Color(0xff003756)),
+                      style: const TextStyle(color: Color(0xff003756)),
                     ),
                   ],
                 ),
               ),
-              Positioned(
+              const Positioned(
                 top:445 ,
                 left: 105,
                 child: Icon(
@@ -347,15 +348,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       height: 60.0,
                       width: 60.0,
                       decoration: BoxDecoration(
-                        color: Color(0xcf7C4CAC),
+                        color: const Color(0xcf7C4CAC),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: IconButton(
                         onPressed: () {
                           setState(() => _selectedButton = 1);
-                          _user = fetchUsers(date, 'Total');
+                          _user = ApiService().fetchUsers(date, 'Total');
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.groups,
                           color: Colors.white,
                           size: 42,
@@ -364,7 +365,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     ),
                     sizedBox,
                     Text('Total:$total',
-                        style: TextStyle(color: Color(0xff003756)))
+                        style: const TextStyle(color: Color(0xff003756)))
                   ],
                 ),
               ),
@@ -377,33 +378,33 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       height: 60.0,
                       width: 60.0,
                       decoration: BoxDecoration(
-                        color: Color(0xcf7C4CAC),
+                        color: const Color(0xcf7C4CAC),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: IconButton(
                         onPressed: () {
                           setState(() => _selectedButton = 2);
-                          _user = fetchUsers(date, absentStatus);
+                          _user = ApiService().fetchUsers(date, absentStatus);
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.person,
                           color: Colors.white,
                           size: 42,
                         ),
                       ),
                     ),
-                    SizedBox(height: 15,),
+                    const SizedBox(height: 15,),
                     Text('Not Check In:$notCheckedIn',
-                        style: TextStyle(color: Color(0xff003756))),
+                        style: const TextStyle(color: Color(0xff003756))),
 
                   ],
                 ),
               ),
-              Positioned(
+              const Positioned(
                 top: 445,
                 left: 380,
                 child: Padding(
-                  padding: const EdgeInsets.all(2.0),
+                  padding: EdgeInsets.all(2.0),
                   child: CircleAvatar(
                     radius: 11,
                     backgroundColor: Colors.red,
@@ -432,30 +433,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Future<List<User>> fetchUsers(var date, var status) async {
-    try {
-      var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/adminFindAllByDateAndStatus?date=$date&status=$status';
-      print(api);
-      var response = await http.get(Uri.parse(api));
-      if (response.statusCode == 200) {
-        var getUsersData = json.decode(response.body) as List;
-        print(getUsersData);
-        var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
-        return listUsers;
-      } else {
-        throw Exception('Failed to load users');
-      }
-    } catch (e) {
-      print(e);
-      rethrow;
-    }
-  }
 
   void usersCount(var date) async {
     try {
       String apiEndpoint =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/adminTotalUserCount?date=$date';
+          '$appUrl/UserActivity/adminTotalUserCount?date=$date';
       final Uri url = Uri.parse(apiEndpoint);
       var jsonResponse;
       final response = await http.get(url);

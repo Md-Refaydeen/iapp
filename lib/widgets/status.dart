@@ -8,7 +8,7 @@ class StatusIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (status == "Present" || status=="Late") {
-      return Center(
+      return const Center(
         child: Icon(
           Icons.check_circle,
           color: Colors.green,
@@ -16,7 +16,7 @@ class StatusIndicator extends StatelessWidget {
         ),
       );
     } else if(status=='Absent' || status=='null'){
-      return Center(
+      return const Center(
         child: Icon(
           Icons.close_rounded,
           color: Colors.red,
@@ -26,7 +26,7 @@ class StatusIndicator extends StatelessWidget {
 
     }
     else{
-      return Center(
+      return const Center(
         child: Icon(
           Icons.close_rounded,
           color: Colors.red,

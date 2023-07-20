@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:iapp/constants/constants.dart';
 
 class AlertBox extends StatelessWidget {
   const AlertBox({Key? key}) : super(key: key);
@@ -15,7 +14,7 @@ class AlertBox extends StatelessWidget {
         child: Container(
           height: MediaQuery.of(context).size.height / 4.0,
           width: MediaQuery.of(context).size.width / 1.4,
-          decoration: BoxDecoration(),
+          decoration: const BoxDecoration(),
           child: Column(
             children: [
               Row(
@@ -28,24 +27,24 @@ class AlertBox extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
+              const Text(
                 'Alert!!',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
-              Text(
+              const Text(
                 'Please click a date to know details',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF003756)),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
               MaterialButton(
@@ -53,11 +52,11 @@ class AlertBox extends StatelessWidget {
                   Navigator.of(context).pop();
 
                 },
-                color: Color(0xEF5278FF),
+                color: const Color(0xEF5278FF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
+                child: const Text(
                   'Ok',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),

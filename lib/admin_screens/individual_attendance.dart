@@ -9,7 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../constants/constants.dart';
 import '../dto/user.dart';
-import '../screens/login_screen.dart';
+import '../user_screens/login_screen.dart';
 import '../services/getLoc_Time.dart';
 import '../widgets/admindrawer_components.dart';
 import 'attendance_screen.dart';
@@ -32,7 +32,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
   int? month, year;
   List<User> _attendanceDetailsList = []; // initial empty list
 
-  Location location = Location();
+  GetLoc_Time location = GetLoc_Time();
   var name;
   var empId, emailId;
   String? formattedStartDate, formattedEndDate;
@@ -107,14 +107,14 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                     Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height / 3,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: LinearGradient(colors: [
                           Color(0xB6B091CF),
                           Color(0xFFAD8DCD),
                         ]),
                       ),
                       child: Row(children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 5,
                         ),
                         Column(
@@ -125,7 +125,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                               onPressed: () {
                                 _scaffoldKey.currentState?.openDrawer();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.menu,
                                 color: Color(0xFF3F3D56),
                                 size: 23,
@@ -138,7 +138,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                   Navigator.pushNamed(
                                       context, AdminAttendanceScreen.routeName);
                                 },
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.arrow_circle_left_outlined,
                                   color: Color(0xFF3F3D56),
                                   size: 28,
@@ -159,7 +159,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                           Card(
                             margin: const EdgeInsets.all(30.0),
                             elevation: 10.0,
-                            shape: RoundedRectangleBorder(
+                            shape: const RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(25),
                               ),
@@ -191,7 +191,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           child: Text(
                                             date.day.toString(),
                                             style:
-                                                TextStyle(color: Colors.white),
+                                                const TextStyle(color: Colors.white),
                                           ),
                                         );
                                       } else if (isSameDay(date, _rangeEnd)) {
@@ -207,7 +207,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           child: Text(
                                             date.day.toString(),
                                             style:
-                                                TextStyle(color: Colors.white),
+                                                const TextStyle(color: Colors.white),
                                           ),
                                         );
                                       } else if (date.isAfter(_rangeStart!) &&
@@ -224,7 +224,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           child: Text(
                                             date.day.toString(),
                                             style:
-                                                TextStyle(color: Colors.white),
+                                                const TextStyle(color: Colors.white),
                                           ),
                                         );
                                       } else {
@@ -240,7 +240,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           child: Text(
                                             date.day.toString(),
                                             style:
-                                                TextStyle(color: Colors.white),
+                                                const TextStyle(color: Colors.white),
                                           ),
                                         );
                                       }
@@ -256,7 +256,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                       ),
                                       child: Text(
                                         date.day.toString(),
-                                        style: TextStyle(color: Colors.white),
+                                        style: const TextStyle(color: Colors.white),
                                       ),
                                     );
                                   }
@@ -287,7 +287,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                     color: Color(0xFF7C4CAC),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(15))),
-                                weekendTextStyle: TextStyle(color: Colors.blue),
+                                weekendTextStyle: const TextStyle(color: Colors.blue),
                               ),
                               headerStyle: HeaderStyle(
                                   formatButtonShowsNext: false,
@@ -325,7 +325,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                         .format(_rangeEnd!)
                                     : '';
 
-                                List<User> users = await AdminApiClass()
+                                List<User> users = await ApiService()
                                     .individualRangeDate(emailId,
                                         formattedStartDate, formattedEndDate);
                                 print('user:$users');
@@ -362,7 +362,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           if (dataSource.rowCount == 0) {
                                             return Container(
                                               alignment: Alignment.center,
-                                              child: Text('No data available.'),
+                                              child: const Text('No data available.'),
                                             );
                                           }
                                           return Container(
@@ -370,10 +370,10 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                                     .size
                                                     .width /
                                                 1.1,
-                                            constraints: BoxConstraints(
+                                            constraints: const BoxConstraints(
                                               minHeight: 200, // Set a mi
                                             ),
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                                 borderRadius: BorderRadius.only(
                                                   topLeft: Radius.circular(18),
                                                   topRight: Radius.circular(18),
@@ -392,20 +392,20 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                             child: PaginatedDataTable(
                                               dataRowHeight: 55,
                                               columnSpacing: 15,
-                                              header: Text('Individual Report'),
+                                              header: const Text('Individual Report'),
                                               columns: [
-                                                DataColumn(label: Text('Date')),
-                                                DataColumn(label: Text('Mode')),
-                                                DataColumn(
+                                                const DataColumn(label: Text('Date')),
+                                                const DataColumn(label: Text('Mode')),
+                                                const DataColumn(
                                                     label: Text('In & Out')),
-                                                DataColumn(
+                                                const DataColumn(
                                                     label: Text('Totalhrs')),
-                                                DataColumn(
+                                                const DataColumn(
                                                     label: Text('Remarks')),
                                               ],
                                               actions: [
                                                 IconButton(
-                                                  icon: Icon(Icons.refresh),
+                                                  icon: const Icon(Icons.refresh),
                                                   onPressed: () async {
                                                     print('onPress called');
                                                     List<User> users=await fetchDetails(emailId, month, year);
@@ -435,7 +435,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                           return Text(
                                               snapshot.error.toString());
                                         }
-                                        return CircularProgressIndicator();
+                                        return const CircularProgressIndicator();
                                       },
                                     );
                                   }),
@@ -448,7 +448,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                       if (formattedStartDate != null &&
                                           formattedEndDate != null) {
                                         print('range dates');
-                                        attendanceDetails = await AdminApiClass()
+                                        attendanceDetails = await ApiService()
                                                 .individualRangeDate(
                                                     emailId,
                                                     formattedStartDate,
@@ -471,7 +471,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                               17,
                                       width: MediaQuery.of(context).size.width /
                                           1.12,
-                                      margin: EdgeInsets.only(
+                                      margin: const EdgeInsets.only(
                                           top: 0.1,
                                           bottom:
                                               8), // add margin to adjust spacing
@@ -479,7 +479,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                             color: Colors.grey.shade200),
-                                        borderRadius: BorderRadius.only(
+                                        borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(6),
                                           topRight: Radius.circular(6),
                                           bottomRight: Radius.circular(25),
@@ -487,7 +487,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                                         ),
                                         color: Colors.white,
                                       ),
-                                      child: Center(
+                                      child: const Center(
                                           child: Text(
                                         'Export',
                                         style: TextStyle(
@@ -519,7 +519,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15.0),
                         color: Colors.white,
-                        boxShadow: [
+                        boxShadow: const[
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 15.0,
@@ -533,13 +533,13 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
                         ),
                         Text(
                           '$name' == null ? '---' : name,
-                          style: TextStyle(fontSize: 24),
+                          style: const TextStyle(fontSize: 24),
                         ),
                         sizedBox,
                         Text('$empId' == null ? '----' : '$empId'),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                          children: const [
                             Text(
                               'Digital Transformation Trainee',
                               style: TextStyle(
@@ -573,7 +573,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
   Future<void> fetchData(var name) async {
     try {
       String apiEndpoint =
-          'http://ems-ma.ideassionlive.in/api/User/getEmailByName?name=$name';
+          '$appUrl/User/getEmailByName?name=$name';
 
       final Uri url = Uri.parse(apiEndpoint);
       var jsonResponse;
@@ -599,7 +599,7 @@ class _UserAttendanceScreenState extends State<UserAttendanceScreen> {
   Future<List<User>> fetchDetails(var email, int? month, int? year) async {
     try {
       var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
+          '$appUrl/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
       print(api);
       var response = await http.get(Uri.parse(api));
       print(response);
@@ -638,7 +638,7 @@ class AttendanceDetailsDataSource extends DataTableSource {
                   ? '----'
                   : DateFormat('dd MMM')
                       .format(DateTime.parse(attendanceDetail.date.toString())),
-          style: TextStyle(color: Color(0xFF003756)),
+          style: const TextStyle(color: Color(0xFF003756)),
         )),
         DataCell(
           Container(
@@ -650,13 +650,13 @@ class AttendanceDetailsDataSource extends DataTableSource {
                   attendanceDetail.workmode == null
                       ? '------'
                       : '${attendanceDetail.workmode}',
-                  style: TextStyle(color: Color(0xFF003756)),
+                  style: const TextStyle(color: Color(0xFF003756)),
                 ),
                 Text(
                   attendanceDetail.workModeCheckOut == null
                       ? '------'
                       : '${attendanceDetail.workModeCheckOut}',
-                  style: TextStyle(color: Color(0xFF003756)),
+                  style: const TextStyle(color: Color(0xFF003756)),
                 ),
               ],
             ),
@@ -672,13 +672,13 @@ class AttendanceDetailsDataSource extends DataTableSource {
                   '${attendanceDetail.loginTime}' == 'null'
                       ? '----'
                       : '${attendanceDetail.loginTime}',
-                  style: TextStyle(color: Color(0xFF003756)),
+                  style: const TextStyle(color: Color(0xFF003756)),
                 ),
                 Text(
                   '${attendanceDetail.logoutTime}' == 'null'
                       ? '----'
                       : '${attendanceDetail.logoutTime}',
-                  style: TextStyle(color: Color(0xFF003756)),
+                  style: const TextStyle(color: Color(0xFF003756)),
                 ),
               ],
             ),
@@ -689,7 +689,7 @@ class AttendanceDetailsDataSource extends DataTableSource {
             attendanceDetail.totalWorkingHours == null
                 ? '----'
                 : '${attendanceDetail.totalWorkingHours}',
-            style: TextStyle(color: Color(0xFF003756)),
+            style: const TextStyle(color: Color(0xFF003756)),
           ),
         ),
         DataCell(
@@ -697,7 +697,7 @@ class AttendanceDetailsDataSource extends DataTableSource {
             attendanceDetail.status == null
                 ? '----'
                 : '${attendanceDetail.status}',
-            style: TextStyle(color: Color(0xFF003756)),
+            style: const TextStyle(color: Color(0xFF003756)),
           ),
         ),
       ],

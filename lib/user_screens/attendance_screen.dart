@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import '../services/getLoc_Time.dart';
 import '../widgets/list_components.dart';
 import 'home_screen.dart';
-import '../screens/login_screen.dart';
+import 'login_screen.dart';
 
 class AttendanceScreen extends StatefulWidget {
   static String routeName = 'AttendanceScreen';
@@ -24,15 +24,13 @@ class AttendanceScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<AttendanceScreen> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  bool _isInkwellEnabled = true;
 
   Future<List<User>>? _user;
   Map<DateTime, List<dynamic>> _events = {};
   bool isDataAvailable = true;
 
-  Location location = Location();
+  GetLoc_Time location = GetLoc_Time();
   DateTime _selectedDate=DateTime.now();
-  DateTime? _dates;
   Timer? _debounce;
   var day;
   bool _isVisible = false;
@@ -99,13 +97,13 @@ class _CalendarScreenState extends State<AttendanceScreen> {
           backgroundColor: Colors.purple.shade50,
           width: MediaQuery.of(context).size.width * 0.7,
           child: ListView(
-            padding: EdgeInsets.only(top: 65.0),
+            padding: const EdgeInsets.only(top: 65.0),
             children: <Widget>[
               IconButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: Icon(Icons.arrow_back_ios),
+                  icon: const Icon(Icons.arrow_back_ios),
                   alignment: Alignment.topRight),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -114,7 +112,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 15,
                     width: MediaQuery.of(context).size.width / 8,
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       backgroundImage: AssetImage(
                         'assets/images/user.png',
                       ),
@@ -127,7 +125,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                   ),
                   Text(
                     name,
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ],
               ),
@@ -165,7 +163,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                 height: MediaQuery.of(context).size.height / 9.5,
               ),
               Container(
-                margin: EdgeInsets.only(
+                margin: const EdgeInsets.only(
                     top: kDefaultPadding, right: kDefaultPadding),
                 width: MediaQuery.of(context).size.width / 4,
                 height: MediaQuery.of(context).size.height / 10,
@@ -196,7 +194,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                     width: MediaQuery.of(context).size.width / 30,
                   ),
                   IconButton(
-                    icon: Icon(Icons.menu, color: Colors.white),
+                    icon: const Icon(Icons.menu, color: Colors.white),
                     onPressed: () {
                       _scaffoldKey.currentState?.openDrawer();
                     },
@@ -214,7 +212,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                     child: Card(
                       margin: const EdgeInsets.all(30.0),
                       elevation: 10.0,
-                      shape: RoundedRectangleBorder(
+                      shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(
                           Radius.circular(25),
                         ),
@@ -231,7 +229,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                           _debounce =
                               Timer(const Duration(milliseconds: 500), () {
                             // Call the API here
-                            Future.delayed(Duration(milliseconds: 500), () {
+                            Future.delayed(const Duration(milliseconds: 500), () {
                               checkStatus(email, month, year).then((value) {
                                 // Update the calendar state here
                                 setState(() {});
@@ -266,7 +264,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                   borderRadius: BorderRadius.circular(25)),
                               child: Text(
                                 date.day.toString(),
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               )),
                         ),
                         focusedDay: _selectedDate!,
@@ -275,11 +273,11 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                             color: Colors.blue,
                             borderRadius: BorderRadius.circular(25),
                           ),
-                          todayDecoration: BoxDecoration(
+                          todayDecoration: const BoxDecoration(
                               color: Colors.green,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(25))),
-                          weekendTextStyle: TextStyle(color: Colors.blue),
+                          weekendTextStyle: const TextStyle(color: Colors.blue),
                         ),
                         headerStyle: HeaderStyle(
                           formatButtonShowsNext: false,
@@ -300,13 +298,15 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                   ),
                   InkWell(
                     //behavior: HitTestBehavior.translucent,
+                    onTap: showToast,
+                    //behavior: HitTestBehavior.translucent,
                     child: Container(
                       alignment: Alignment.center,
                       height: 40,
                       width: MediaQuery.of(context).size.width / 1.6,
                       decoration: BoxDecoration(
                           color: Colors.purple.shade200,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(kDefaultPadding),
                             topLeft: Radius.circular(kDefaultPadding),
                             bottomRight: Radius.circular(kDefaultPadding),
@@ -318,13 +318,12 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         children: [
                           IconButton(
                               onPressed: () {},
-                              icon: Icon(Icons.info),
-                              color: Color(0xFFFFC701)),
-                          Text('Tap to view Attendance Details'),
+                              icon: const Icon(Icons.info),
+                              color: const Color(0xFFFFC701)),
+                          const Text('Tap to view Attendance Details'),
                         ],
                       ),
                     ),
-                    onTap: showToast,
                   ),
                   sizedBox,
                   Visibility(
@@ -332,7 +331,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                       child: Container(
                         height: MediaQuery.of(context).size.height / 7.3,
                         width: MediaQuery.of(context).size.width / 1.1,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.only(
                               topRight: Radius.circular(10),
@@ -343,9 +342,9 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            SizedBox(width: 10,),
+                            const SizedBox(width: 10,),
                             Text(rdate != null ? '$rdate' : '---'),
-                            VerticalDivider(
+                            const VerticalDivider(
                               color: Color(0xFF5C5C5C),
                               thickness: 1,
                             ),
@@ -361,28 +360,28 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                     mainAxisSize: MainAxisSize.max,
                                     // /alignment: WrapAlignment.center,                                            //mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      Text('Mode'),
+                                      const Text('Mode'),
                                       SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width /
                                               12.5),
-                                      Text('In &Out'),
+                                      const Text('In &Out'),
                                       SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width /
                                                 12.5,
                                       ),
-                                      Text('Total Hrs'),
+                                      const Text('Total Hrs'),
                                       SizedBox(
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width /
                                               12.5),
-                                      Text('Remarks'),
+                                      const Text('Remarks'),
                                     ],
                                   ),
-                                  Divider(
+                                  const Divider(
                                     thickness: 1,
                                     color: Color(0xFF5C5C5C),
                                   ),
@@ -429,7 +428,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                                           ? '$remarks'
                                           : '-----'),
                                     ],
-                                  ):Center(child: Text('No Data Available'),),
+                                  ):const Center(child: Text('No Data Available'),),
                                 ],
                               ),
                             ),
@@ -437,7 +436,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                         ),
                       )),
                   //       attendanceDetails(),
-                  SizedBox(
+                  const SizedBox(
                     height: kDefaultPadding * 2,
                   ),
                   Container(
@@ -474,19 +473,19 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                           child: Column(
                             children: [
                               sizedBox,
-                              Text(
+                              const Text(
                                 'Total Absent',
                                 style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w700,
                                     color: Colors.white),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: kDefaultPadding * 2,
                               ),
                               Text(
                                 absent != null ? '$absent' : '0',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 50, color: Colors.white),
                               ),
                             ],
@@ -527,19 +526,19 @@ class _CalendarScreenState extends State<AttendanceScreen> {
                               child: Column(
                                 children: [
                                   sizedBox,
-                                  Text(
+                                  const Text(
                                     'Total Present',
                                     style: TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.w700,
                                         color: Colors.white),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: kDefaultPadding * 2,
                                   ),
                                   Text(
                                     present != null ? '$present' : '0',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 50, color: Colors.white),
                                   ),
                                 ],
@@ -561,7 +560,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
   Future<void> showAlert() async {
     if(_showAlert){
-      showDialog(context: context, builder: (_) => AlertBox());
+      showDialog(context: context, builder: (_) => const AlertBox());
 
     }
 
@@ -571,7 +570,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
     try {
       //15 Wed
       String apiEndpoint =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/countStatusByMonth?email=$email&month=$month&year=$year';
+          '$appUrl/UserActivity/countStatusByMonth?email=$email&month=$month&year=$year';
       final Uri url = Uri.parse(apiEndpoint);
       print(url);
       var jsonResponse;
@@ -607,7 +606,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
       print(date);
       print('fetchDate:$dates');
       String apiEndpoint =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndDate?email=$email&date=$dates';
+          '$appUrl/UserActivity/findByEmailAndDate?email=$email&date=$dates';
       final Uri url = Uri.parse(apiEndpoint);
 
       print(url);
@@ -659,7 +658,7 @@ class _CalendarScreenState extends State<AttendanceScreen> {
   Future<List<User>> fetchDetails(var email, int? month, int? year) async {
     try {
       var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
+          '$appUrl/UserActivity/findByEmailAndMonth?email=$email&month=$month&year=$year';
       print(api);
       var response = await http.get(Uri.parse(api));
       print(response);
@@ -694,7 +693,6 @@ class _CalendarScreenState extends State<AttendanceScreen> {
 
   List<String> _getEvents(DateTime date) {
     String formattedDate = DateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(date);
-    // Retrieve the list of events for the formatted date
     var statuses = _events[formattedDate] ?? [];
     print('statuses:$statuses');
 

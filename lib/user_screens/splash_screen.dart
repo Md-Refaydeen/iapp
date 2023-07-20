@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:iapp/screens/login_screen.dart';
+import 'package:iapp/user_screens/login_screen.dart';
 import 'package:progress_indicators/progress_indicators.dart';
 
 import '../constants/constants.dart';
@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 5),(){
+    Future.delayed(const Duration(seconds: 5),(){
       //for not returning to splash screen
       Navigator.pushNamedAndRemoveUntil(context, LoginScreen.routeName, (route) => false);
     });

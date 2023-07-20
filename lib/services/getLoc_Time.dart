@@ -6,7 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
-class Location {
+class GetLoc_Time {
   String? cdate3;
   String? day;
   String? homeAddress;
@@ -47,7 +47,7 @@ class Location {
           .subAdministrativeArea},${place.postalCode}';
       print('home:$homeAddress');
     }).catchError((e) {
-      debugPrint(e);
+      debugPrint(e.toString());
     });
     //calling date and time functions
     // print('Current Address:$currentAddress,time:$finalTime,date:$date');

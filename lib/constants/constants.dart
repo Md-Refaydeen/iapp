@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 const Color bgColor=Color(0xFFD1C4E9);
 const Color boxColor=Color(0xB6DED2EB);
-const Color box1Ateendance=Color(0xFFCE3636);
-const Color box2Ateendance=Color(0xFFFF0000);
+const Color box1Attendance=Color(0xFFCE3636);
+const Color box2Attendance=Color(0xFFFF0000);
 const Color labels=Color(0xFF1A237E);
 const Color textField=Color(0xFFF3F0F0);
 const Color iconColor=Color(0xFF88828F);
@@ -22,4 +22,7 @@ const sizedBox=SizedBox(height: kDefaultPadding,);
 
 //admin
 const Color adminHomeBG=Color(0xffEFE8F5);
+
+//appURL
+const String appUrl='http://192.168.0.149:8082';
 

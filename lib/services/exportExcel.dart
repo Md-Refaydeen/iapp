@@ -53,7 +53,7 @@ class ExportExcel {
 
     for (var attendance in attendanceDetails) {
       for (String key in attendance.keys) {
-        sheetObject.appendRow(['$key']);
+        sheetObject.appendRow([key]);
 
         if (attendance[key] is List) {
           for (var value in attendance[key]) {
@@ -97,7 +97,7 @@ class ExportExcel {
     // Show a notification to the user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Your Excel file has been saved.'),
+        content: const Text('Your Excel file has been saved.'),
         action: SnackBarAction(
           label: 'View',
           onPressed: () {
@@ -207,7 +207,7 @@ class ExportExcel {
     // Show a notification to the user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Your Excel file has been saved.'),
+        content: const Text('Your Excel file has been saved.'),
         action: SnackBarAction(
           label: 'View',
           onPressed: () {
@@ -221,7 +221,7 @@ class ExportExcel {
 
   Future<void> exportIndividualData(
       BuildContext context, List<User> data) async {
-    List<User> users = await data;
+    List<User> users = data;
 
     var excel =
         Excel.createExcel(); // automatically creates 1 empty sheet: Sheet1
@@ -299,7 +299,7 @@ class ExportExcel {
     // / Show a notification to the user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Your Excel file has been saved.'),
+        content: const Text('Your Excel file has been saved.'),
         action: SnackBarAction(
           label: 'View',
           onPressed: () {

@@ -39,7 +39,6 @@ dependencies:
   google_maps_flutter: ^2.2.3
   location: ^4.4.0
   intl: ^0.18.0
-  easy_geofencing: ^0.2.0
   slide_digital_clock: ^1.0.2
   date_format: ^2.0.7
   flutter_svg: ^1.1.6
@@ -56,6 +55,10 @@ dependencies:
   open_file: ^3.2.1
   responsive_framework: ^0.2.0
   toggle_switch: ^2.0.1
+  geofence_service: ^4.0.0
+  geolocator: ^9.0.1
+
+
 
 
 

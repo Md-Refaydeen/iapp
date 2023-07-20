@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:iapp/constants/constants.dart';
 
 import '../dto/user.dart';
 
-class AdminApiClass {
+class ApiService {
   //exporting in month api for all details ui
   Future<List<User>> fetchCount(int? month, int? year) async {
     try {
       var response = await http.get(Uri.parse(
-          'http://ems-ma.ideassionlive.in/api/UserActivity/countAllStatusByMonth?month=$month&year=$year'));
+          '$appUrl/UserActivity/countAllStatusByMonth?month=$month&year=$year'));
       print(response.statusCode);
       print(response);
       if (response.statusCode == 200) {
@@ -30,7 +31,7 @@ class AdminApiClass {
   Future<List> exportByMonth(int month, int year) async {
     try {
       var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/exportUserAttendenceByMonth?month=$month&year=$year';
+          '$appUrl/UserActivity/exportUserAttendenceByMonth?month=$month&year=$year';
       List<dynamic> dataList = [];
 
       print(api);
@@ -55,7 +56,7 @@ class AdminApiClass {
   Future<List> exportByRange(String? startDate, String? endDate) async {
     try {
       var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/adminUserListFromDateRange?startDate=$startDate&endDate=$endDate';
+          '$appUrl/UserActivity/adminUserListFromDateRange?startDate=$startDate&endDate=$endDate';
       List<dynamic> dataList = [];
 
       print(api);
@@ -81,7 +82,7 @@ class AdminApiClass {
       String? startDate, String? endDate) async {
     try {
       var response = await http.get(Uri.parse(
-          'http://ems-ma.ideassionlive.in/api/UserActivity/findAllStatusCountByRange?startDate=$startDate&endDate=$endDate'));
+          '$appUrl/UserActivity/findAllStatusCountByRange?startDate=$startDate&endDate=$endDate'));
       print(response.statusCode);
       print(response);
       if (response.statusCode == 200) {
@@ -105,7 +106,7 @@ class AdminApiClass {
       var email, String? startDate, String? endDate) async {
     try {
       var api =
-          'http://ems-ma.ideassionlive.in/api/UserActivity/userListRangeAndEmail?email=$email&startDate=$startDate&endDate=$endDate';
+          '$appUrl/UserActivity/userListRangeAndEmail?email=$email&startDate=$startDate&endDate=$endDate';
       print(api);
       var response = await http.get(Uri.parse(api));
       print(response);
@@ -122,4 +123,27 @@ class AdminApiClass {
       rethrow;
     }
   }
+
+
+  Future<List<User>> fetchUsers(var date, var status) async {
+    try {
+      var api =
+          '$appUrl/UserActivity/adminFindAllByDateAndStatus?date=$date&status=$status';
+      print(api);
+      var response = await http.get(Uri.parse(api));
+      if (response.statusCode == 200) {
+        var getUsersData = json.decode(response.body) as List;
+        print(getUsersData);
+        var listUsers = getUsersData.map((i) => User.fromJson(i)).toList();
+        return listUsers;
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      print(e);
+      rethrow;
+    }
+  }
+
+
 }
